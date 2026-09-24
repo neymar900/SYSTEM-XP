@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="es" class="dark h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SYSTEM XP V1 — RPG Productivity App</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            hud: {
+              bg: '#0a0d14',
+              card: '#121824',
+              border: '#1e293b',
+              blue: '#38bdf8',
+              cyan: '#22d3ee',
+              purple: '#a855f7',
+              gold: '#fbbf24',
+              green: '#10b981',
+              danger: '#f43f5e'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Consolas', 'monospace']
+          },
+          boxShadow: {
+            'glow-blue': '0 0 20px rgba(56, 189, 248, 0.25)',
+            'glow-purple': '0 0 20px rgba(168, 85, 247, 0.25)',
+            'glow-gold': '0 0 20px rgba(251, 191, 36, 0.3)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Styling -->
+  <style>
+    body {
+      background-color: #0a0d14;
+      color: #f1f5f9;
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0a0d14;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* HUD Glow Animation Effects */
+    .hud-border-glow {
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      box-shadow: inset 0 0 10px rgba(56, 189, 248, 0.05), 0 0 15px rgba(56, 189, 248, 0.1);
+    }
+
+    .xp-float-anim {
+      animation: floatUpAndFade 1.2s cubic-bezier(0.16, 1, 0.3, 1) FORWARDS;
+    }
+
+    @keyframes floatUpAndFade {
+      0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.8);
+      }
+      20% {
+        opacity: 1;
+        transform: translateY(-5px) scale(1.1);
+      }
+      80% {
+        opacity: 1;
+        transform: translateY(-25px) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-40px) scale(0.9);
+      }
+    }
+
+    .progress-bar-glow {
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+    }
+
+    /* Glassmorphism Effect */
+    .glass-panel {
+      background: rgba(18, 24, 36, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col justify-between overflow-x-hidden pb-20">
+
+  <!-- Top Navigation & System Status Header -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-hud-border px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-slate-900 font-extrabold shadow-glow-blue">
+        <i class="fa-solid font-black fa-crosshairs text-lg"></i>
+      </div>
+      <div>
+        <h1 class="text-base font-bold tracking-wider text-slate-100 flex items-center gap-1.5">
+          SYSTEM XP
+          <span class="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800/50">V1</span>
+        </h1>
+        <p id="current-date-display" class="text-xs text-slate-400 font-mono">Cargando fecha...</p>
+      </div>
+    </div>
+
+    <!-- Right Utility Actions -->
+    <div class="flex items-center space-x-2">
+      <!-- Day Simulation Switcher -->
+      <div class="relative inline-block text-left">
+        <button id="sim-day-btn" onclick="toggleSimMenu()" class="text-xs font-mono bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors">
+          <i class="fa-regular fa-calendar-check text-cyan-400"></i>
+          <span id="sim-day-label">Hoy</span>
+          <i class="fa-solid fa-chevron-down text-[10px] text-slate-500"></i>
+        </button>
+        <!-- Dropdown Menu -->
+        <div id="sim-day-dropdown" class="hidden absolute right-0 mt-2 w-44 rounded-xl bg-slate-900 border border-slate-800 shadow-2xl z-50 py-1 text-xs">
+          <div class="px-3 py-1.5 text-[10px] font-bold text-slate-500 uppercase font-mono border-b border-slate-800">Simular Día</div>
+          <button onclick="setSimulatedDay('AUTO')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-cyan-400 flex items-center justify-between">
+            <span>Día Real</span> <i id="sim-icon-AUTO" class="fa-solid fa-check text-[10px]"></i>
+          </button>
+          <button onclick="setSimulatedDay('LUNES')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300 flex items-center justify-between">
+            <span>Lunes (Clases)</span> <i id="sim-icon-LUNES" class="fa-solid fa-check text-[10px] hidden"></i>
+          </button>
+          <button onclick="setSimulatedDay('MARTES')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300 flex items-center justify-between">
+            <span>Martes (Clases)</span> <i id="sim-icon-MARTES" class="fa-solid fa-check text-[10px] hidden"></i>
+          </button>
+          <button onclick="setSimulatedDay('MIERCOLES')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300 flex items-center justify-between">
+            <span>Miércoles (Clases)</span> <i id="sim-icon-MIERCOLES" class="fa-solid fa-check text-[10px] hidden"></i>
+          </button>
+          <button onclick="setSimulatedDay('JUEVES')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300 flex items-center justify-between">
+            <span>Jueves (Clases)</span> <i id="sim-icon-JUEVES" class="fa-solid fa-check text-[10px] hidden"></i>
+          </button>
+          <button onclick="setSimulatedDay('VIERNES')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300 flex items-center justify-between">
+            <span>Viernes (Clases)</span> <i id="sim-icon-VIERNES" class="fa-solid fa-check text-[10px] hidden"></i>
+          </button>
+          <button onclick="setSimulatedDay('SABADO')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300 flex items-center justify-between">
+            <span>Sábado (Fin de Sem)</span> <i id="sim-icon-SABADO" class="fa-solid fa-check text-[10px] hidden"></i>
+          </button>
+          <button onclick="setSimulatedDay('DOMINGO')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300 flex items-center justify-between">
+            <span>Domingo (Fin de Sem)</span> <i id="sim-icon-DOMINGO" class="fa-solid fa-check text-[10px] hidden"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Audio SFX Toggle -->
+      <button id="audio-toggle-btn" onclick="toggleAudio()" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-700 text-slate-400 hover:text-slate-200 flex items-center justify-center text-xs">
+        <i id="audio-icon" class="fa-solid fa-volume-high text-cyan-400"></i>
+      </button>
+
+      <!-- Reset Data Button -->
+      <button onclick="resetSystemData()" title="Reiniciar datos guardados" class="w-8 h-8 rounded-lg bg-slate-900 border border-slate-700 text-rose-400 hover:text-rose-300 flex items-center justify-center text-xs">
+        <i class="fa-solid fa-rotate-right"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main View Container -->
+  <main class="max-w-md w-full mx-auto px-4 pt-4 flex-1 flex flex-col gap-4">
+
+    <!-- FLOATING XP NOTIFICATION CONTAINER -->
+    <div id="xp-toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center"></div>
+
+    <!-- ==================== VIEW 1: DASHBOARD (HOME) ==================== -->
+    <section id="view-dashboard" class="view-section flex flex-col gap-4">
+      
+      <!-- Player Profile Stats Card (HUD) -->
+      <div class="hud-border-glow rounded-2xl bg-hud-card p-4 relative overflow-hidden">
+        <!-- Ambient Glow Backdrops -->
+        <div class="absolute -right-8 -top-8 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -left-8 -bottom-8 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+        <!-- Header Profile Info -->
+        <div class="flex items-start justify-between mb-3 relative z-10">
+          <div class="flex items-center space-x-3">
+            <div class="relative">
+              <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-cyan-500/40 flex items-center justify-center shadow-lg">
+                <i class="fa-solid fa-user-ninja text-2xl text-cyan-400"></i>
+              </div>
+              <span id="rank-badge" class="absolute -bottom-1 -right-1 font-mono text-[10px] font-black px-1.5 py-0.2 rounded bg-cyan-500 text-slate-950 uppercase border border-cyan-300">
+                E
+              </span>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 id="player-name" class="text-lg font-bold text-slate-100">Jugador</h2>
+                <span id="rank-title-badge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">Rango E</span>
+              </div>
+              <div class="flex items-center space-x-2 mt-0.5">
+                <span id="player-level" class="text-sm font-bold text-cyan-400 font-mono">NIVEL 2</span>
+                <span class="text-slate-600">•</span>
+                <span id="player-xp-total" class="text-xs font-mono text-slate-300">180 XP</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Streak Badge -->
+          <div class="flex flex-col items-end">
+            <div class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
+              <i class="fa-solid fa-fire text-amber-400 text-sm animate-pulse"></i>
+              <span id="streak-count" class="font-bold text-sm font-mono">0</span>
+              <span class="text-[10px] font-mono text-amber-300/80 uppercase">Días</span>
+            </div>
+            <span class="text-[9px] font-mono text-slate-500 mt-1">Racha Activa</span>
+          </div>
+        </div>
+
+        <!-- Level XP Progress Bar -->
+        <div class="space-y-1 relative z-10 my-2">
+          <div class="flex justify-between items-center text-xs font-mono">
+            <span class="text-slate-400 text-[11px]">Progreso Nivel</span>
+            <span id="xp-progress-text" class="text-cyan-300 font-semibold text-[11px]">80 / 200 XP</span>
+          </div>
+          <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
+            <div id="xp-progress-bar" class="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-full transition-all duration-500 progress-bar-glow" style="width: 40%"></div>
+          </div>
+          <div class="flex justify-between text-[10px] font-mono text-slate-500 pt-0.5">
+            <span id="current-lvl-min-xp">100 XP</span>
+            <span id="next-lvl-needed">Faltan 120 XP</span>
+            <span id="next-lvl-max-xp">300 XP</span>
+          </div>
+        </div>
+
+        <!-- Daily & Weekly Stats Pill Grid -->
+        <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-800/60 font-mono">
+          <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/80 flex flex-col">
+            <span class="text-[10px] text-slate-400 uppercase tracking-wider">XP Hoy</span>
+            <span id="xp-today-display" class="text-base font-bold text-emerald-400 mt-0.5">0 XP</span>
+          </div>
+          <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/80 flex flex-col">
+            <span class="text-[10px] text-slate-400 uppercase tracking-wider">XP Esta Semana</span>
+            <span id="xp-week-display" class="text-base font-bold text-cyan-400 mt-0.5">0 XP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Today's Active Routine Banner -->
+      <div id="routine-banner" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono">
+        <div class="flex items-center space-x-2">
+          <span id="routine-tag-icon" class="w-2 h-2 rounded-full bg-blue-400 animate-ping"></span>
+          <span id="routine-label" class="font-bold text-slate-200">📚 RUTINA DE CLASES</span>
+        </div>
+        <span id="routine-day-badge" class="text-[10px] font-mono uppercase text-slate-400 bg-slate-800 px-2 py-0.5 rounded-md">LUNES</span>
+      </div>
+
+      <!-- Today's Missions List Section -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 font-mono flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-cyan-400"></i> Misiones de Hoy
+          </h3>
+          <span id="missions-count-badge" class="text-xs font-mono text-slate-400">0/0 Completadas</span>
+        </div>
+
+        <!-- Missions Cards Container -->
+        <div id="today-missions-list" class="space-y-2.5">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </div>
+
+      <!-- Quick Action: Manual Quest Logging -->
+      <button onclick="openManualMissionModal()" class="w-full py-3 px-4 rounded-xl bg-slate-900 border border-dashed border-cyan-500/40 text-cyan-400 hover:bg-cyan-950/30 hover:border-cyan-400 transition-all text-xs font-bold font-mono flex items-center justify-center gap-2">
+        <i class="fa-solid fa-plus-circle text-sm"></i> + REGISTRAR MISIÓN MANUAL
+      </button>
+    </section>
+
+    <!-- ==================== VIEW 2: MISIONES (ALL QUESTS) ==================== -->
+    <section id="view-missions" class="view-section hidden flex-col gap-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+            <i class="fa-solid fa-scroll text-cyan-400"></i> Banco de Misiones
+          </h2>
+          <p class="text-xs text-slate-400">Todas las rutinas y misiones disponibles</p>
+        </div>
+        <button onclick="openManualMissionModal()" class="px-3 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs font-mono hover:bg-cyan-400 transition-colors">
+          + Nueva
+        </button>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="flex rounded-xl bg-slate-900 p-1 border border-slate-800 text-xs font-mono">
+        <button onclick="filterMissionsTab('TODOS')" id="tab-m-todos" class="flex-1 py-1.5 rounded-lg font-semibold transition-all bg-cyan-500 text-slate-950">
+          Todas
+        </button>
+        <button onclick="filterMissionsTab('CLASES')" id="tab-m-clases" class="flex-1 py-1.5 rounded-lg font-semibold text-slate-400 hover:text-slate-200 transition-all">
+          Clases
+        </button>
+        <button onclick="filterMissionsTab('FIN_DE_SEMANA')" id="tab-m-finde" class="flex-1 py-1.5 rounded-lg font-semibold text-slate-400 hover:text-slate-200 transition-all">
+          Fin de Semana
+        </button>
+      </div>
+
+      <!-- Full Missions Container -->
+      <div id="all-missions-list" class="space-y-2.5">
+        <!-- Dynamically populated -->
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 3: ATRIBUTOS (STATS) ==================== -->
+    <section id="view-attributes" class="view-section hidden flex-col gap-4">
+      <div>
+        <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+          <i class="fa-solid fa-chart-pie text-cyan-400"></i> Atributos del Jugador
+        </h2>
+        <p class="text-xs text-slate-400">Nivel y XP acumulados por categoría</p>
+      </div>
+
+      <!-- Attribute Grid -->
+      <div id="attributes-grid" class="grid grid-cols-1 gap-2.5">
+        <!-- Dynamically populated -->
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 4: LOGROS (ACHIEVEMENTS) ==================== -->
+    <section id="view-achievements" class="view-section hidden flex-col gap-4">
+      <div>
+        <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+          <i class="fa-solid fa-trophy text-amber-400"></i> Logros y Hitos
+        </h2>
+        <p class="text-xs text-slate-400">Desbloquea recompensas completando desafíos</p>
+      </div>
+
+      <!-- Achievements Progress Summary -->
+      <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs font-mono">
+        <span class="text-slate-300">Logros Desbloqueados:</span>
+        <span id="achievements-summary" class="font-bold text-amber-400">0 / 11</span>
+      </div>
+
+      <!-- Achievements List -->
+      <div id="achievements-list" class="space-y-2.5">
+        <!-- Dynamically populated -->
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 5: MÁS (EXPANDED MENU & TOOLS) ==================== -->
+    <section id="view-more" class="view-section hidden flex-col gap-4">
+      <div>
+        <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+          <i class="fa-solid fa-bars-staggered text-cyan-400"></i> Panel Extendido
+        </h2>
+        <p class="text-xs text-slate-400">Historial, Misiones Especiales, Boss Fights y Código GAS</p>
+      </div>
+
+      <!-- Secondary Menu Selector -->
+      <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+        <button onclick="switchSubTab('history')" id="subtab-history-btn" class="p-3 rounded-xl bg-slate-900 border border-cyan-500/50 text-cyan-400 text-left flex items-center gap-2">
+          <i class="fa-solid fa-clock-rotate-left"></i> Historial
+        </button>
+        <button onclick="switchSubTab('special')" id="subtab-special-btn" class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 text-left flex items-center gap-2">
+          <i class="fa-solid fa-star"></i> Misiones Esp.
+        </button>
+        <button onclick="switchSubTab('boss')" id="subtab-boss-btn" class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 text-left flex items-center gap-2">
+          <i class="fa-solid fa-dragon"></i> Boss Fights
+        </button>
+        <button onclick="switchSubTab('rewards')" id="subtab-rewards-btn" class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 text-left flex items-center gap-2">
+          <i class="fa-solid fa-gift"></i> Recompensas
+        </button>
+      </div>
+
+      <!-- Apps Script Generator Button -->
+      <button onclick="switchSubTab('gas')" id="subtab-gas-btn" class="w-full p-3 rounded-xl bg-gradient-to-r from-purple-900/50 to-blue-900/50 border border-purple-500/40 text-purple-300 font-mono font-bold text-xs flex items-center justify-between">
+        <span class="flex items-center gap-2"><i class="fa-solid fa-code text-cyan-400"></i> PROMPT DEFINITIVO / GENERADOR CÓDIGO GAS</span>
+        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+      </button>
+
+      <!-- SUB-TAB 1: HISTORIAL DE REGISTROS -->
+      <div id="subtab-history" class="subtab-content flex flex-col gap-3">
+        <!-- History Filter Controls -->
+        <div class="flex flex-col gap-2 bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+          <div class="flex gap-1 text-[11px] font-mono">
+            <button onclick="setHistoryTimeFilter('HOY')" id="hist-filter-hoy" class="flex-1 py-1 rounded bg-cyan-500 text-slate-950 font-bold">Hoy</button>
+            <button onclick="setHistoryTimeFilter('SEMANA')" id="hist-filter-semana" class="flex-1 py-1 rounded bg-slate-800 text-slate-400">Semana</button>
+            <button onclick="setHistoryTimeFilter('MES')" id="hist-filter-mes" class="flex-1 py-1 rounded bg-slate-800 text-slate-400">Mes</button>
+            <button onclick="setHistoryTimeFilter('TODO')" id="hist-filter-todo" class="flex-1 py-1 rounded bg-slate-800 text-slate-400">Todo</button>
+          </div>
+        </div>
+
+        <div id="history-records-list" class="space-y-2">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- SUB-TAB 2: MISIONES ESPECIALES -->
+      <div id="subtab-special" class="subtab-content hidden flex-col gap-2.5">
+        <div id="special-missions-list" class="space-y-2.5">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- SUB-TAB 3: BOSS FIGHTS -->
+      <div id="subtab-boss" class="subtab-content hidden flex-col gap-2.5">
+        <div id="boss-fights-list" class="space-y-2.5">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- SUB-TAB 4: RECOMPENSAS -->
+      <div id="subtab-rewards" class="subtab-content hidden flex-col gap-2.5">
+        <div id="rewards-list" class="space-y-2.5">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- SUB-TAB 5: GOOGLE APPS SCRIPT CODE PACK GENERATOR -->
+      <div id="subtab-gas" class="subtab-content hidden flex-col gap-3">
+        <div class="p-3.5 rounded-xl bg-purple-950/30 border border-purple-500/40 text-xs text-purple-200">
+          <p class="font-bold mb-1 flex items-center gap-1.5"><i class="fa-solid fa-circle-info"></i> Para Implementar en Google Apps Script:</p>
+          <p class="text-[11px] text-purple-300/80 leading-relaxed">
+            Puedes copiar y pegar directamente cada uno de estos archivos en tu proyecto de Google Apps Script o ejecutar la inicialización de Google Sheets.
+          </p>
+        </div>
+
+        <!-- Code Exporter Accordion Buttons -->
+        <div class="space-y-2 font-mono text-xs">
+          <div class="rounded-xl bg-slate-900 border border-slate-800 overflow-hidden">
+            <button onclick="toggleCodeViewer('gas-code-gs')" class="w-full px-3 py-2.5 text-left font-bold text-cyan-400 flex justify-between items-center bg-slate-900/80">
+              <span>Code.gs (Apps Script Backend)</span>
+              <i class="fa-solid fa-copy hover:text-cyan-200" onclick="copyCode('gas-code-gs-text', event)" title="Copiar"></i>
+            </button>
+            <div id="gas-code-gs" class="hidden p-3 bg-slate-950 text-[10px] text-slate-300 font-mono overflow-x-auto max-h-60 border-t border-slate-800">
+              <pre id="gas-code-gs-text"></pre>
+            </div>
+          </div>
+
+          <div class="rounded-xl bg-slate-900 border border-slate-800 overflow-hidden">
+            <button onclick="toggleCodeViewer('gas-code-init')" class="w-full px-3 py-2.5 text-left font-bold text-emerald-400 flex justify-between items-center bg-slate-900/80">
+              <span>Setup Google Sheets (initializeSheets)</span>
+              <i class="fa-solid fa-copy hover:text-emerald-200" onclick="copyCode('gas-code-init-text', event)" title="Copiar"></i>
+            </button>
+            <div id="gas-code-init" class="hidden p-3 bg-slate-950 text-[10px] text-slate-300 font-mono overflow-x-auto max-h-60 border-t border-slate-800">
+              <pre id="gas-code-init-text"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- ==================== MODAL: REGISTRO MANUAL DE MISIÓN ==================== -->
+  <div id="manual-mission-modal" class="fixed inset-0 z-50 glass-panel bg-slate-950/80 hidden items-center justify-center p-4">
+    <div class="w-full max-w-sm rounded-2xl bg-slate-900 border border-cyan-500/40 p-4 space-y-4 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <h3 class="text-sm font-bold text-slate-100 font-mono flex items-center gap-2">
+          <i class="fa-solid fa-plus-circle text-cyan-400"></i> Registrar Misión Manual
+        </h3>
+        <button onclick="closeManualMissionModal()" class="text-slate-400 hover:text-slate-200">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleManualMissionSubmit(event)" class="space-y-3 font-mono text-xs">
+        <div>
+          <label class="block text-slate-400 text-[10px] uppercase mb-1">Nombre de la Actividad</label>
+          <input type="text" id="manual-name" required placeholder="Ej. Lectura extra / Repaso de examen" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:outline-none focus:border-cyan-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 text-[10px] uppercase mb-1">Atributo</label>
+            <select id="manual-attribute" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:outline-none focus:border-cyan-500">
+              <option value="Conocimiento">Conocimiento</option>
+              <option value="Tecnología">Tecnología</option>
+              <option value="Físico">Físico</option>
+              <option value="Combate">Combate</option>
+              <option value="Baile">Baile</option>
+              <option value="Oratoria">Oratoria</option>
+              <option value="Social">Social</option>
+              <option value="Apariencia">Apariencia</option>
+              <option value="Mindset">Mindset</option>
+              <option value="Programación">Programación</option>
+              <option value="Inglés">Inglés</option>
+              <option value="Artes Marciales">Artes Marciales</option>
+              <option value="Preparación ESFM">Preparación ESFM</option>
+              <option value="Ajedrez">Ajedrez</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 text-[10px] uppercase mb-1">Recompensa (XP)</label>
+            <input type="number" id="manual-xp" required min="5" max="500" value="30" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:outline-none focus:border-cyan-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 text-[10px] uppercase mb-1">Nota Opcional</label>
+          <input type="text" id="manual-note" placeholder="Ej. Módulo 3 completado" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:outline-none focus:border-cyan-500">
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button type="button" onclick="closeManualMissionModal()" class="flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold hover:bg-slate-700">
+            Cancelar
+          </button>
+          <button type="submit" class="flex-1 py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold hover:bg-cyan-400">
+            [ COMPLETAR ]
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== FIXED MOBILE BOTTOM NAVIGATION ==================== -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 glass-panel border-t border-hud-border py-1.5 px-3">
+    <div class="max-w-md mx-auto flex items-center justify-around font-mono text-[10px]">
+      
+      <!-- Nav 1: Inicio -->
+      <button onclick="switchView('dashboard')" id="nav-btn-dashboard" class="flex flex-col items-center gap-0.5 text-cyan-400 font-bold transition-all">
+        <i class="fa-solid fa-house-chimney text-base"></i>
+        <span>INICIO</span>
+      </button>
+
+      <!-- Nav 2: Misiones -->
+      <button onclick="switchView('missions')" id="nav-btn-missions" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 transition-all">
+        <i class="fa-solid fa-crosshairs text-base"></i>
+        <span>MISIONES</span>
+      </button>
+
+      <!-- Nav 3: Atributos -->
+      <button onclick="switchView('attributes')" id="nav-btn-attributes" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 transition-all">
+        <i class="fa-solid fa-chart-pie text-base"></i>
+        <span>ATRIBUTOS</span>
+      </button>
+
+      <!-- Nav 4: Logros -->
+      <button onclick="switchView('achievements')" id="nav-btn-achievements" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 transition-all">
+        <i class="fa-solid fa-trophy text-base"></i>
+        <span>LOGROS</span>
+      </button>
+
+      <!-- Nav 5: Más -->
+      <button onclick="switchView('more')" id="nav-btn-more" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 transition-all">
+        <i class="fa-solid fa-bars-staggered text-base"></i>
+        <span>MÁS</span>
+      </button>
+
+    </div>
+  </nav>
+
+  <!-- JavaScript Application Engine -->
+  <script>
+
+    // Sound FX Switch
+    let soundEnabled = true;
+
+    // Simulated day override ('AUTO' or day name like 'LUNES', 'SABADO')
+    let simulatedDayOverride = 'AUTO';
+
+    // Current filter for history
+    let currentHistoryTimeFilter = 'HOY';
+
+    function saveState() {
+      try {
+        localStorage.setItem('SYSTEM_XP_DATA_V1', JSON.stringify(SYSTEM_XP));
+      } catch (e) {
+        console.error("Error al guardar en LocalStorage:", e);
+      }
+    }
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem('SYSTEM_XP_DATA_V1');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.profile) SYSTEM_XP.profile = parsed.profile;
+          if (parsed.records) SYSTEM_XP.records = parsed.records;
+          if (parsed.missions) SYSTEM_XP.missions = parsed.missions;
+          if (parsed.achievements) SYSTEM_XP.achievements = parsed.achievements;
+          if (parsed.specialMissions) SYSTEM_XP.specialMissions = parsed.specialMissions;
+          if (parsed.bossFights) SYSTEM_XP.bossFights = parsed.bossFights;
+          if (parsed.rewards) SYSTEM_XP.rewards = parsed.rewards;
+        }
+      } catch (e) {
+        console.error("Error al cargar de LocalStorage:", e);
+      }
+    }
+
+    function resetSystemData() {
+      if (localStorage.getItem('SYSTEM_XP_DATA_V1')) {
+        localStorage.removeItem('SYSTEM_XP_DATA_V1');
+        showToastNotification("🔄 Datos reiniciados. Recargando...", "warning");
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        showToastNotification("⚠️ No hay datos guardados para reiniciar", "warning");
+      }
+    }
+
+    // SYSTEM XP DEFAULT IN-MEMORY BACKEND PERSISTENCE
+    const SYSTEM_XP = {
+      profile: {
+        id: "PROFILE_1",
+        nombre: "Jugador",
+        xpTotal: 180, // Default starting XP as requested
+        nivel: 2,
+        rango: "E",
+        racha: 0,
+        ultimoDiaActivo: "",
+        xpHoy: 0,
+        xpSemana: 0
+      },
+
+      // ALL MISSIONS DATA (EDITABLE VIA GOOGLE SHEETS IN REAL GAS APPS)
+      missions: [
+        // --- ROUTINE: CLASES (LUNES A VIERNES) ---
+        { id: "M_01", nombre: "Despertar a tiempo", descripcion: "Levantarse a las 05:45", atributo: "Mindset", dia: "TODOS", rutina: "CLASES", horaInicio: "05:45", horaFin: "06:00", xp: 10, tipo: "DIARIA", activa: true },
+        { id: "M_02", nombre: "Salir puntual", descripcion: "Salir de casa a las 06:20", atributo: "Apariencia", dia: "TODOS", rutina: "CLASES", horaInicio: "06:20", horaFin: "06:30", xp: 10, tipo: "DIARIA", activa: true },
+        { id: "M_03", nombre: "Asistir a clases ESFM", descripcion: "Atención completa en la escuela", atributo: "Preparación ESFM", dia: "TODOS", rutina: "CLASES", horaInicio: "07:00", horaFin: "13:30", xp: 30, tipo: "DIARIA", activa: true },
+        { id: "M_04", nombre: "Tareas / estudio ESFM", descripcion: "Repaso y deberes académicos", atributo: "Preparación ESFM", dia: "TODOS", rutina: "CLASES", horaInicio: "15:00", horaFin: "16:00", xp: 40, tipo: "DIARIA", activa: true },
+        { id: "M_05", nombre: "Matemáticas extra", descripcion: "Resolución de ejercicios avanzados", atributo: "Conocimiento", dia: "TODOS", rutina: "CLASES", horaInicio: "16:00", horaFin: "16:45", xp: 30, tipo: "DIARIA", activa: true },
+        
+        // Dynamic Daily Specific Quests (LUNES - VIERNES)
+        { id: "M_LUN_1", nombre: "Python / Programación", descripcion: "Práctica de código y lógica", atributo: "Programación", dia: "LUNES", rutina: "CLASES", horaInicio: "17:00", horaFin: "18:00", xp: 30, tipo: "DIARIA", activa: true },
+        { id: "M_LUN_2", nombre: "Entrenamiento físico", descripcion: "Rutina de calistenia / fuerza", atributo: "Físico", dia: "LUNES", rutina: "CLASES", horaInicio: "17:00", horaFin: "18:00", xp: 40, tipo: "DIARIA", activa: true },
+        
+        { id: "M_MAR_1", nombre: "Artes marciales", descripcion: "Práctica de combate y técnica", atributo: "Artes Marciales", dia: "MARTES", rutina: "CLASES", horaInicio: "17:00", horaFin: "18:00", xp: 40, tipo: "DIARIA", activa: true },
+        { id: "M_MAR_2", nombre: "Oratoria", descripcion: "Práctica de expresión y vocalización", atributo: "Oratoria", dia: "MARTES", rutina: "CLASES", horaInicio: "17:00", horaFin: "18:00", xp: 20, tipo: "DIARIA", activa: true },
+        
+        { id: "M_MIE_1", nombre: "Python / Programación", descripcion: "Algoritmos y proyectos", atributo: "Programación", dia: "MIERCOLES", rutina: "CLASES", horaInicio: "17:00", horaFin: "18:00", xp: 30, tipo: "DIARIA", activa: true },
+        { id: "M_MIE_2", nombre: "Entrenamiento físico", descripcion: "Acondicionamiento físico general", atributo: "Físico", dia: "MIERCOLES", rutina: "CLASES", horaInicio: "17:00", horaFin: "18:00", xp: 40, tipo: "DIARIA", activa: true },
+        
+        { id: "M_JUE_1", nombre: "Baile", descripcion: "Práctica de ritmo y movimiento", atributo: "Baile", dia: "JUEVES", rutina: "CLASES", horaInicio: "17:00", horaFin: "18:00", xp: 30, tipo: "DIARIA", activa: true },
+        { id: "M_JUE_2", nombre: "Artes marciales", descripcion: "Técnica de combate", atributo: "Artes Marciales", dia: "JUEVES", rutina: "CLASES", horaInicio: "17:00", horaFin: "18:00", xp: 40, tipo: "DIARIA", activa: true },
+        
+        { id: "M_VIE_1", nombre: "Entrenamiento físico", descripcion: "Cierre físico semanal", atributo: "Físico", dia: "VIERNES", rutina: "CLASES", horaInicio: "17:00", horaFin: "18:00", xp: 40, tipo: "DIARIA", activa: true },
+        { id: "M_VIE_2", nombre: "Actividad social / deporte", descripcion: "Interacción y deporte en equipo", atributo: "Social", dia: "VIERNES", rutina: "CLASES", horaInicio: "17:00", horaFin: "18:00", xp: 20, tipo: "DIARIA", activa: true },
+        
+        { id: "M_06", nombre: "Repaso ligero", descripcion: "Consolidación de temas del día", atributo: "Conocimiento", dia: "TODOS", rutina: "CLASES", horaInicio: "19:00", horaFin: "20:00", xp: 20, tipo: "DIARIA", activa: true },
+        { id: "M_07", nombre: "Dormir a tiempo", descripcion: "Acostarse a las 22:15", atributo: "Mindset", dia: "TODOS", rutina: "CLASES", horaInicio: "22:15", horaFin: "22:30", xp: 20, tipo: "DIARIA", activa: true },
+
+        // --- ROUTINE: FIN DE SEMANA (SABADO Y DOMINGO) ---
+        { id: "M_WE_01", nombre: "Meditación & Mindset", descripcion: "Enfoque diario y calma mental", atributo: "Mindset", dia: "TODOS", rutina: "FIN_DE_SEMANA", horaInicio: "06:00", horaFin: "06:15", xp: 15, tipo: "DIARIA", activa: true },
+        { id: "M_WE_02", nombre: "Lectura: Persuasión / Lenguaje Corporal", descripcion: "Lectura estratégica personal", atributo: "Persuasión y Lenguaje Corporal", dia: "TODOS", rutina: "FIN_DE_SEMANA", horaInicio: "06:15", horaFin: "06:45", xp: 25, tipo: "DIARIA", activa: true },
+        { id: "M_WE_03", nombre: "Mini-Coding / Curso de Python", descripcion: "Módulo corto de desarrollo", atributo: "Programación", dia: "TODOS", rutina: "FIN_DE_SEMANA", horaInicio: "06:45", horaFin: "07:15", xp: 40, tipo: "DIARIA", activa: true },
+        { id: "M_WE_04", nombre: "Desayuno + vocabulario de inglés", descripcion: "Nutrición + 20 palabras clave", atributo: "Inglés", dia: "TODOS", rutina: "FIN_DE_SEMANA", horaInicio: "07:15", horaFin: "07:45", xp: 20, tipo: "DIARIA", activa: true },
+        { id: "M_WE_05", nombre: "Entreno de artes marciales", descripcion: "Sombra, sparring o drills", atributo: "Artes Marciales", dia: "TODOS", rutina: "FIN_DE_SEMANA", horaInicio: "07:45", horaFin: "08:30", xp: 50, tipo: "DIARIA", activa: true },
+        { id: "M_WE_06", nombre: "Ducha, cuidado físico y rutina de belleza", descripcion: "Cuidado personal completo", atributo: "Físico y Belleza", dia: "TODOS", rutina: "FIN_DE_SEMANA", horaInicio: "08:30", horaFin: "09:00", xp: 30, tipo: "DIARIA", activa: true },
+        { id: "M_WE_07", nombre: "Estudio ESFM / Simulacro + corrección", descripcion: "Sesión intensiva académcia", atributo: "Preparación ESFM", dia: "TODOS", rutina: "FIN_DE_SEMANA", horaInicio: "09:00", horaFin: "11:00", xp: 80, tipo: "DIARIA", activa: true },
+        { id: "M_WE_08", nombre: "Práctica de ajedrez + análisis", descripcion: "Partida táctica + revisión", atributo: "Ajedrez", dia: "TODOS", rutina: "FIN_DE_SEMANA", horaInicio: "11:15", horaFin: "12:00", xp: 20, tipo: "DIARIA", activa: true },
+        { id: "M_WE_09", nombre: "Almuerzo + descanso mental", descripcion: "Desconexión consciente", atributo: "Mindset", dia: "TODOS", rutina: "FIN_DE_SEMANA", horaInicio: "12:00", horaFin: "13:00", xp: 15, tipo: "DIARIA", activa: true },
+        { id: "M_WE_10", nombre: "Curso de Python + ejercicios", descripcion: "Bloque principal de programación", atributo: "Programación", dia: "TODOS", rutina: "FIN_DE_SEMANA", horaInicio: "13:00", horaFin: "15:00", xp: 60, tipo: "DIARIA", activa: true },
+        { id: "M_WE_11", nombre: "Entreno de futsal o fútbol", descripcion: "Deporte y cardio dinámico", atributo: "Deporte Colectivo", dia: "TODOS", rutina: "FIN_DE_SEMANA", horaInicio: "15:15", horaFin: "16:00", xp: 25, tipo: "DIARIA", activa: true },
+        { id: "M_WE_12", nombre: "Clase de baile / práctica individual", descripcion: "Coreografía y expresión", atributo: "Baile", dia: "TODOS", rutina: "FIN_DE_SEMANA", horaInicio: "16:00", horaFin: "17:00", xp: 30, tipo: "DIARIA", activa: true },
+        { id: "M_WE_13", nombre: "Entrenamiento físico principal", descripcion: "Sesión completa de acondicionamiento", atributo: "Físico y Belleza", dia: "TODOS", rutina: "FIN_DE_SEMANA", horaInicio: "17:00", horaFin: "18:00", xp: 60, tipo: "DIARIA", activa: true },
+        { id: "M_WE_14", nombre: "Cena + práctica de conversación", descripcion: "Socialización y expresión", atributo: "Vida Social", dia: "TODOS", rutina: "FIN_DE_SEMANA", horaInicio: "18:00", horaFin: "19:00", xp: 40, tipo: "DIARIA", activa: true },
+        { id: "M_WE_15", nombre: "Revisión diaria de XP + plan para mañana", descripcion: "Auditoría de hábitos", atributo: "Mindset", dia: "TODOS", rutina: "FIN_DE_SEMANA", horaInicio: "20:00", horaFin: "20:30", xp: 15, tipo: "DIARIA", activa: true },
+        { id: "M_WE_16", nombre: "Lectura o podcast sobre liderazgo/oratoria", descripcion: "Crecimiento personal", atributo: "Liderazgo y Oratoria", dia: "TODOS", rutina: "FIN_DE_SEMANA", horaInicio: "20:30", horaFin: "21:00", xp: 20, tipo: "DIARIA", activa: true },
+        { id: "M_WE_17", nombre: "Tiempo libre controlado", descripcion: "Recreación balanceada", atributo: "Bonus-Quest", dia: "TODOS", rutina: "FIN_DE_SEMANA", horaInicio: "21:00", horaFin: "22:00", xp: 30, tipo: "DIARIA", activa: true },
+        { id: "M_WE_18", nombre: "Preparación para dormir y desconexión", descripcion: "Cierre del día", atributo: "Mindset", dia: "TODOS", rutina: "FIN_DE_SEMANA", horaInicio: "22:00", horaFin: "22:30", xp: 10, tipo: "DIARIA", activa: true }
+      ],
+
+      // INITIAL COMPLETED RECORDS (REPRESENTING STARTING 180 XP)
+      records: [
+        { id: "REC_01", fecha: getTodayDateString(), hora: "08:30", misionId: "INIT_1", mision: "Misión: Físico + Baile", atributo: "Físico", xp: 90, tipo: "DIARIA", nota: "Registro inicial de progreso" },
+        { id: "REC_02", fecha: getTodayDateString(), hora: "11:45", misionId: "INIT_2", mision: "Misión: Ajedrez + Inglés", atributo: "Ajedrez", xp: 40, tipo: "DIARIA", nota: "Registro inicial de progreso" },
+        { id: "REC_03", fecha: getTodayDateString(), hora: "17:30", misionId: "INIT_3", mision: "Misión: MMA", atributo: "Artes Marciales", xp: 50, tipo: "DIARIA", nota: "Registro inicial de progreso" }
+      ],
+
+      // ACHIEVEMENTS DATA
+      achievements: [
+        { id: "ACH_1", nombre: "Primer Nivel", descripcion: "Alcanza el Nivel 2 en el sistema.", condicion: "level >= 2", xpRecompensa: 50, desbloqueado: true, fecha: "2026-09-24" },
+        { id: "ACH_2", nombre: "3 Días de Racha", descripcion: "Mantén una racha de 3 días consecutivos.", condicion: "streak >= 3", xpRecompensa: 50, desbloqueado: false, fecha: "" },
+        { id: "ACH_3", nombre: "7 Días de Racha", descripcion: "Mantén una racha de 7 días consecutivos.", condicion: "streak >= 7", xpRecompensa: 100, desbloqueado: false, fecha: "" },
+        { id: "ACH_4", nombre: "30 Días de Racha", descripcion: "Mantén una racha de 30 días disciplina total.", condicion: "streak >= 30", xpRecompensa: 500, desbloqueado: false, fecha: "" },
+        { id: "ACH_5", nombre: "10 Entrenamientos", descripcion: "Completa 10 sesiones de entrenamiento físico.", condicion: "workouts >= 10", xpRecompensa: 100, desbloqueado: false, fecha: "" },
+        { id: "ACH_6", nombre: "30 Entrenamientos", descripcion: "Completa 30 sesiones de entrenamiento físico.", condicion: "workouts >= 30", xpRecompensa: 300, desbloqueado: false, fecha: "" },
+        { id: "ACH_7", nombre: "100 Misiones Completadas", descripcion: "Registra un total de 100 misiones cumplidas.", condicion: "missions >= 100", xpRecompensa: 1000, desbloqueado: false, fecha: "" },
+        { id: "ACH_8", nombre: "Primer proyecto tecnológico", descripcion: "Desarrolla un proyecto funcional en Python.", condicion: "special", xpRecompensa: 200, desbloqueado: false, fecha: "" },
+        { id: "ACH_9", nombre: "Primera exposición importante", descripcion: "Presenta una exposición destacada en la ESFM.", condicion: "special", xpRecompensa: 150, desbloqueado: false, fecha: "" },
+        { id: "ACH_10", nombre: "Primera coreografía completa", descripcion: "Aprende e interpreta una secuencia de baile.", condicion: "special", xpRecompensa: 150, desbloqueado: false, fecha: "" },
+        { id: "ACH_11", nombre: "Primer trimestre completado", descripcion: "Supera con éxito el primer trimestre ESFM.", condicion: "special", xpRecompensa: 500, desbloqueado: false, fecha: "" }
+      ],
+
+      // SPECIAL QUESTS
+      specialMissions: [
+        { id: "SPEC_1", nombre: "Completar una exposición ESFM", descripcion: "Presentación oral ante la clase", categoria: "ÉPICA", xp: 150, fechaLimite: "2026-10-15", estado: "PENDIENTE" },
+        { id: "SPEC_2", nombre: "Terminar un proyecto Python", descripcion: "Crear una app o script funcional", categoria: "ÉPICA", xp: 200, fechaLimite: "2026-10-30", estado: "PENDIENTE" },
+        { id: "SPEC_3", nombre: "Aprender una coreografía completa", descripcion: "Ensayo y grabación final", categoria: "RARA", xp: 100, fechaLimite: "2026-11-05", estado: "PENDIENTE" },
+        { id: "SPEC_4", nombre: "Mantener 100 días de disciplina", descripcion: "Sin romper la racha diaria", categoria: "LEGENDARIA", xp: 2000, fechaLimite: "2026-12-31", estado: "PENDIENTE" }
+      ],
+
+      // BOSS FIGHTS
+      bossFights: [
+        { id: "BOSS_1", nombre: "Examen de Trimestre 1 ESFM", descripcion: "Evaluación integral de asignaturas principales", trimestre: "PRIMER TRIMESTRE", fecha: "2026-11-20", xp: 500, estado: "PENDIENTE" },
+        { id: "BOSS_2", nombre: "Proyecto de Integración Pedagógica", descripcion: "Presentación y defensa formal", trimestre: "SEGUNDO TRIMESTRE", fecha: "2027-03-15", xp: 800, estado: "PENDIENTE" },
+        { id: "BOSS_3", nombre: "Evaluación Final de Grado", descripcion: "Boss final del año académico", trimestre: "TERCER TRIMESTRE", fecha: "2027-06-30", xp: 1500, estado: "PENDIENTE" }
+      ],
+
+      // REWARDS
+      rewards: [
+        { id: "REW_1", condicion: "Nivel 10", tipo: "TÍTULO", descripcion: "Desbloquea el Título: Estudiante Disciplinado", desbloqueada: false },
+        { id: "REW_2", condicion: "Nivel 25", tipo: "EQUIPAMIENTO", descripcion: "Acceso a Equipamiento Especial / Rango D", desbloqueada: false },
+        { id: "REW_3", condicion: "Nivel 50", tipo: "PRIVILEGIO", descripcion: "Día de Recompensa Libre sin penalización", desbloqueada: false },
+        { id: "REW_4", condicion: "Nivel 100", tipo: "MAESTRÍA", descripcion: "Título Legendario: Maestro del Sistema XP", desbloqueada: false }
+      ]
+    };
+
+
+    /**
+     * FORMULA XP (PROMPT REQUIREMENT #5):
+     * XP acumulada necesaria para alcanzar el Nivel N:
+     * XP = 100 * N * (N - 1) / 2
+     */
+    function calculateRequiredXp(level) {
+      if (level <= 1) return 0;
+      return (100 * level * (level - 1)) / 2;
+    }
+
+    function calculateLevel(xp) {
+      if (xp <= 0) return 1;
+      // Derived inverse from XP = 50 * N^2 - 50 * N => 50*N^2 - 50*N - XP = 0
+      // N = (1 + sqrt(1 + 8*(XP/100))) / 2
+      const level = Math.floor((1 + Math.sqrt(1 + (8 * xp / 100))) / 2);
+      return Math.max(1, level);
+    }
+
+    function calculateProgress(xp) {
+      const level = calculateLevel(xp);
+      const currentLvlMinXp = calculateRequiredXp(level);
+      const nextLvlMinXp = calculateRequiredXp(level + 1);
+      
+      const xpInCurrentLvl = xp - currentLvlMinXp;
+      const totalForNextLvl = nextLvlMinXp - currentLvlMinXp;
+      const progressPercent = Math.min(100, Math.max(0, (xpInCurrentLvl / totalForNextLvl) * 100));
+
+      return {
+        level,
+        currentLvlMinXp,
+        nextLvlMinXp,
+        xpInCurrentLvl,
+        totalForNextLvl,
+        progressPercent: Math.round(progressPercent),
+        neededForNext: nextLvlMinXp - xp
+      };
+    }
+
+    /**
+     * RANKS (PROMPT REQUIREMENT #6):
+     */
+    function calculateRank(level) {
+      if (level >= 251) return { code: "Nacional", title: "Rango Nacional", bg: "bg-red-500", text: "text-red-400" };
+      if (level >= 151) return { code: "S", title: "Rango S", bg: "bg-amber-400", text: "text-amber-300" };
+      if (level >= 101) return { code: "A", title: "Rango A", bg: "bg-purple-500", text: "text-purple-300" };
+      if (level >= 76)  return { code: "B", title: "Rango B", bg: "bg-blue-500", text: "text-blue-300" };
+      if (level >= 51)  return { code: "C", title: "Rango C", bg: "bg-cyan-500", text: "text-cyan-300" };
+      if (level >= 26)  return { code: "D", title: "Rango D", bg: "bg-emerald-500", text: "text-emerald-300" };
+      return { code: "E", title: "Rango E", bg: "bg-slate-400", text: "text-slate-300" };
+    }
+
+
+    function getTodayDayName() {
+      if (simulatedDayOverride !== 'AUTO') return simulatedDayOverride;
+      
+      const days = ['DOMINGO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'];
+      const now = new Date();
+      return days[now.getDay()];
+    }
+
+    function getActiveRoutineForDay(dayName) {
+      if (dayName === 'SABADO' || dayName === 'DOMINGO') {
+        return 'FIN_DE_SEMANA';
+      }
+      return 'CLASES';
+    }
+
+    function getTodayDateString() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function getTodayMissions() {
+      const currentDay = getTodayDayName();
+      const activeRoutine = getActiveRoutineForDay(currentDay);
+
+      return SYSTEM_XP.missions.filter(m => {
+        if (!m.activa) return false;
+        if (m.rutina !== activeRoutine) return false;
+        if (m.dia === 'TODOS' || m.dia === currentDay) return true;
+        return false;
+      });
+    }
+
+
+    function playSoundEffect(type) {
+      if (!soundEnabled) return;
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        if (type === 'complete') {
+          // Dual high pitch chord (RPG quest complete chime)
+          const osc1 = audioCtx.createOscillator();
+          const osc2 = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+
+          osc1.type = 'triangle';
+          osc2.type = 'sine';
+          osc1.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+          osc1.frequency.exponentialRampToValueAtTime(1046.50, audioCtx.currentTime + 0.3); // C6
+
+          osc2.frequency.setValueAtTime(659.25, audioCtx.currentTime); // E5
+          osc2.frequency.exponentialRampToValueAtTime(1318.51, audioCtx.currentTime + 0.3); // E6
+
+          gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+
+          osc1.connect(gain);
+          osc2.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc1.start();
+          osc2.start();
+          osc1.stop(audioCtx.currentTime + 0.35);
+          osc2.stop(audioCtx.currentTime + 0.35);
+        } else if (type === 'levelup') {
+          // Ascending Level Up fanfare
+          const notes = [440, 554.37, 659.25, 880];
+          notes.forEach((freq, index) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime + index * 0.1);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime + index * 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + (index + 1) * 0.12);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(audioCtx.currentTime + index * 0.1);
+            osc.stop(audioCtx.currentTime + (index + 1) * 0.12);
+          });
+        }
+      } catch (e) {
+        console.log("Audio FX suppressed", e);
+      }
+    }
+
+    function toggleAudio() {
+      soundEnabled = !soundEnabled;
+      const icon = document.getElementById('audio-icon');
+      if (soundEnabled) {
+        icon.className = 'fa-solid fa-volume-high text-cyan-400';
+      } else {
+        icon.className = 'fa-solid fa-volume-xmark text-slate-500';
+      }
+    }
+
+
+    function isMissionCompletedToday(missionId) {
+      const todayStr = getTodayDateString();
+      return SYSTEM_XP.records.some(r => r.misionId === missionId && r.fecha === todayStr);
+    }
+
+    function completeMission(missionId) {
+      // Find mission
+      const mission = SYSTEM_XP.missions.find(m => m.id === missionId);
+      if (!mission) return;
+
+      // Duplicate guard
+      if (isMissionCompletedToday(missionId)) {
+        showToastNotification("⚠️ Misión ya completada hoy", "warning");
+        return;
+      }
+
+      const prevLevel = calculateLevel(SYSTEM_XP.profile.xpTotal);
+
+      // 1. Add XP to Total Profile
+      SYSTEM_XP.profile.xpTotal += mission.xp;
+      
+      // Calculate new level & rank
+      const newLevel = calculateLevel(SYSTEM_XP.profile.xpTotal);
+      SYSTEM_XP.profile.nivel = newLevel;
+      SYSTEM_XP.profile.rango = calculateRank(newLevel).code;
+
+      // 2. Create History Record
+      const newRecord = {
+        id: "REC_" + Date.now(),
+        fecha: getTodayDateString(),
+        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        misionId: mission.id,
+        mision: mission.nombre,
+        atributo: mission.atributo,
+        xp: mission.xp,
+        tipo: mission.tipo || "DIARIA",
+        nota: "Completada desde rutina"
+      };
+      SYSTEM_XP.records.unshift(newRecord);
+
+      // 3. Update Streaks
+      updateStreak();
+
+      // Save Local Persistence
+      saveState();
+
+      // 4. Play FX
+      playSoundEffect('complete');
+      if (newLevel > prevLevel) {
+        setTimeout(() => playSoundEffect('levelup'), 300);
+        showToastNotification(`🎉 ¡SUBISTE AL NIVEL ${newLevel}!`, "levelup");
+      } else {
+        showToastNotification(`+${mission.xp} XP • ${mission.nombre}`, "xp");
+      }
+
+      // 5. Re-render UI
+      renderDashboard();
+      renderAllMissions();
+      renderAttributes();
+      renderAchievements();
+      renderHistory();
+    }
+
+    function handleManualMissionSubmit(event) {
+      event.preventDefault();
+      const name = document.getElementById('manual-name').value.trim();
+      const attr = document.getElementById('manual-attribute').value;
+      const xp = parseInt(document.getElementById('manual-xp').value, 10);
+      const note = document.getElementById('manual-note').value.trim();
+
+      if (!name || isNaN(xp) || xp <= 0) return;
+
+      const prevLevel = calculateLevel(SYSTEM_XP.profile.xpTotal);
+      
+      SYSTEM_XP.profile.xpTotal += xp;
+      const newLevel = calculateLevel(SYSTEM_XP.profile.xpTotal);
+      SYSTEM_XP.profile.nivel = newLevel;
+      SYSTEM_XP.profile.rango = calculateRank(newLevel).code;
+
+      const newRecord = {
+        id: "REC_MANUAL_" + Date.now(),
+        fecha: getTodayDateString(),
+        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        misionId: "MANUAL_" + Date.now(),
+        mision: name,
+        atributo: attr,
+        xp: xp,
+        tipo: "MANUAL",
+        nota: note || "Registro libre"
+      };
+      SYSTEM_XP.records.unshift(newRecord);
+
+      updateStreak();
+      saveState();
+      playSoundEffect('complete');
+
+      if (newLevel > prevLevel) {
+        setTimeout(() => playSoundEffect('levelup'), 300);
+        showToastNotification(`🎉 ¡SUBISTE AL NIVEL ${newLevel}!`, "levelup");
+      } else {
+        showToastNotification(`+${xp} XP • ${name}`, "xp");
+      }
+
+      closeManualMissionModal();
+      renderDashboard();
+      renderAttributes();
+      renderHistory();
+    }
+
+    function updateStreak() {
+      // Calculate streak: if at least 1 mission recorded today, streak >= 1
+      const todayStr = getTodayDateString();
+      const hasRecordToday = SYSTEM_XP.records.some(r => r.fecha === todayStr);
+      if (hasRecordToday && SYSTEM_XP.profile.racha === 0) {
+        SYSTEM_XP.profile.racha = 1;
+      }
+    }
+
+
+    function renderDashboard() {
+      const p = SYSTEM_XP.profile;
+      const prog = calculateProgress(p.xpTotal);
+      const rank = calculateRank(prog.level);
+
+      // Header Date Display
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+      document.getElementById('current-date-display').innerText = now.toLocaleDateString('es-ES', options);
+
+      // Profile HUD
+      document.getElementById('player-name').innerText = p.nombre;
+      document.getElementById('player-level').innerText = `NIVEL ${prog.level}`;
+      document.getElementById('player-xp-total').innerText = `${p.xpTotal} XP`;
+      
+      // Rank Badges
+      const rBadge = document.getElementById('rank-badge');
+      rBadge.innerText = rank.code;
+      
+      const rTitle = document.getElementById('rank-title-badge');
+      rTitle.innerText = rank.title;
+      rTitle.className = `text-[10px] font-mono px-2 py-0.5 rounded-full ${rank.bg} text-slate-950 font-bold`;
+
+      // Streak Badge
+      document.getElementById('streak-count').innerText = p.racha;
+
+      // Progress Bar
+      document.getElementById('xp-progress-text').innerText = `${prog.xpInCurrentLvl} / ${prog.totalForNextLvl} XP`;
+      document.getElementById('xp-progress-bar').style.width = `${prog.progressPercent}%`;
+      document.getElementById('current-lvl-min-xp').innerText = `${prog.currentLvlMinXp} XP`;
+      document.getElementById('next-lvl-needed').innerText = `Faltan ${prog.neededForNext} XP`;
+      document.getElementById('next-lvl-max-xp').innerText = `${prog.nextLvlMinXp} XP`;
+
+      // Calculate Today & Week XP totals
+      const todayStr = getTodayDateString();
+      const xpToday = SYSTEM_XP.records
+        .filter(r => r.fecha === todayStr)
+        .reduce((sum, r) => sum + r.xp, 0);
+
+      document.getElementById('xp-today-display').innerText = `${xpToday} XP`;
+      document.getElementById('xp-week-display').innerText = `${xpToday + 180} XP`; // Includes initial weekly baseline
+
+      // Routine Banner Setup
+      const currentDay = getTodayDayName();
+      const routine = getActiveRoutineForDay(currentDay);
+      const routineLabel = document.getElementById('routine-label');
+      const routineDayBadge = document.getElementById('routine-day-badge');
+      const routineTagIcon = document.getElementById('routine-tag-icon');
+
+      routineDayBadge.innerText = currentDay;
+
+      if (routine === 'FIN_DE_SEMANA') {
+        routineLabel.innerText = "⚔️ RUTINA DE FIN DE SEMANA";
+        routineTagIcon.className = "w-2 h-2 rounded-full bg-amber-400 animate-ping";
+      } else {
+        routineLabel.innerText = "📚 RUTINA DE CLASES";
+        routineTagIcon.className = "w-2 h-2 rounded-full bg-cyan-400 animate-ping";
+      }
+
+      // Render Today Missions
+      const todayMissions = getTodayMissions();
+      const missionsList = document.getElementById('today-missions-list');
+      missionsList.innerHTML = "";
+
+      let completedCount = 0;
+
+      todayMissions.forEach(m => {
+        const completed = isMissionCompletedToday(m.id);
+        if (completed) completedCount++;
+
+        const card = document.createElement('div');
+        card.className = `p-3.5 rounded-2xl border transition-all flex flex-col justify-between gap-3 ${
+          completed 
+            ? 'bg-slate-900/40 border-slate-800/80 opacity-70' 
+            : 'bg-hud-card border-slate-800 hover:border-cyan-500/50 shadow-md'
+        }`;
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-100">${m.nombre}</span>
+                ${m.horaInicio ? `<span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">${m.horaInicio}</span>` : ''}
+              </div>
+              <p class="text-[11px] text-slate-400">${m.descripcion}</p>
+            </div>
+            <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-800/50 px-2 py-0.5 rounded-lg">
+              +${m.xp} XP
+            </span>
+          </div>
+
+          <div class="flex items-center justify-between border-t border-slate-800/60 pt-2 text-[11px] font-mono">
+            <span class="text-slate-400 flex items-center gap-1">
+              <i class="fa-solid fa-tag text-[10px] text-cyan-400"></i> ${m.atributo}
+            </span>
+
+            ${completed ? `
+              <span class="text-emerald-400 font-bold flex items-center gap-1 bg-emerald-950 px-2.5 py-1 rounded-xl border border-emerald-800/60">
+                <i class="fa-solid fa-check-circle"></i> COMPLETADO
+              </span>
+            ` : `
+              <button onclick="completeMission('${m.id}')" class="px-3 py-1 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-extrabold hover:from-cyan-400 hover:to-blue-500 active:scale-95 transition-all shadow-glow-blue">
+                [ COMPLETAR ]
+              </button>
+            `}
+          </div>
+        `;
+
+        missionsList.appendChild(card);
+      });
+
+      document.getElementById('missions-count-badge').innerText = `${completedCount}/${todayMissions.length} Completadas`;
+    }
+
+    function renderAllMissions(filterRoutine = 'TODOS') {
+      const container = document.getElementById('all-missions-list');
+      container.innerHTML = "";
+
+      let filtered = SYSTEM_XP.missions;
+      if (filterRoutine !== 'TODOS') {
+        filtered = filtered.filter(m => m.rutina === filterRoutine);
+      }
+
+      filtered.forEach(m => {
+        const completed = isMissionCompletedToday(m.id);
+        const card = document.createElement('div');
+        card.className = `p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs font-mono`;
+
+        card.innerHTML = `
+          <div class="space-y-0.5">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-200">${m.nombre}</span>
+              <span class="text-[9px] px-1.5 py-0.2 rounded ${m.rutina === 'CLASES' ? 'bg-cyan-950 text-cyan-400' : 'bg-amber-950 text-amber-400'}">${m.rutina}</span>
+            </div>
+            <p class="text-[10px] text-slate-400">${m.atributo} • ${m.dia}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-400 font-bold">+${m.xp} XP</span>
+            ${completed ? `
+              <span class="text-emerald-400 text-[10px]"><i class="fa-solid fa-circle-check"></i></span>
+            ` : `
+              <button onclick="completeMission('${m.id}')" class="px-2 py-1 rounded bg-cyan-500 text-slate-950 font-bold text-[10px]">
+                Completar
+              </button>
+            `}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function filterMissionsTab(routine) {
+      document.getElementById('tab-m-todos').className = "flex-1 py-1.5 rounded-lg font-semibold transition-all " + (routine === 'TODOS' ? 'bg-cyan-500 text-slate-950' : 'text-slate-400');
+      document.getElementById('tab-m-clases').className = "flex-1 py-1.5 rounded-lg font-semibold transition-all " + (routine === 'CLASES' ? 'bg-cyan-500 text-slate-950' : 'text-slate-400');
+      document.getElementById('tab-m-finde').className = "flex-1 py-1.5 rounded-lg font-semibold transition-all " + (routine === 'FIN_DE_SEMANA' ? 'bg-cyan-500 text-slate-950' : 'text-slate-400');
+      
+      renderAllMissions(routine);
+    }
+
+    function renderAttributes() {
+      const container = document.getElementById('attributes-grid');
+      container.innerHTML = "";
+
+      // Aggregate XP per Attribute from records
+      const attrXpMap = {};
+      SYSTEM_XP.records.forEach(r => {
+        if (!attrXpMap[r.atributo]) attrXpMap[r.atributo] = 0;
+        attrXpMap[r.atributo] += r.xp;
+      });
+
+      // Render Attribute Cards
+      const attributes = [
+        "Conocimiento", "Tecnología", "Físico", "Combate", "Baile", "Oratoria", 
+        "Social", "Apariencia", "Mindset", "Programación", "Inglés", "Artes Marciales", 
+        "Preparación ESFM", "Ajedrez", "Físico y Belleza"
+      ];
+
+      attributes.forEach(attr => {
+        const xp = attrXpMap[attr] || 0;
+        const prog = calculateProgress(xp);
+
+        const card = document.createElement('div');
+        card.className = "p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-2 font-mono text-xs";
+        card.innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-slate-200 flex items-center gap-1.5">
+              <i class="fa-solid fa-gem text-cyan-400 text-[10px]"></i> ${attr}
+            </span>
+            <div class="flex items-center gap-2">
+              <span class="text-cyan-400 font-bold">Nivel ${prog.level}</span>
+              <span class="text-slate-400 text-[10px]">(${xp} XP)</span>
+            </div>
+          </div>
+          <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
+            <div class="h-full bg-cyan-400 rounded-full" style="width: ${prog.progressPercent}%"></div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderAchievements() {
+      const container = document.getElementById('achievements-list');
+      container.innerHTML = "";
+
+      let unlockedCount = 0;
+
+      SYSTEM_XP.achievements.forEach(a => {
+        if (a.desbloqueado) unlockedCount++;
+
+        const card = document.createElement('div');
+        card.className = `p-3 rounded-xl border flex items-center justify-between text-xs font-mono ${
+          a.desbloqueado ? 'bg-amber-950/20 border-amber-500/40' : 'bg-slate-900 border-slate-800 opacity-60'
+        }`;
+
+        card.innerHTML = `
+          <div class="space-y-0.5">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid ${a.desbloqueado ? 'fa-trophy text-amber-400' : 'fa-lock text-slate-500'}"></i>
+              <span class="font-bold ${a.desbloqueado ? 'text-amber-200' : 'text-slate-300'}">${a.nombre}</span>
+            </div>
+            <p class="text-[10px] text-slate-400">${a.descripcion}</p>
+          </div>
+          <span class="text-amber-400 font-bold">+${a.xpRecompensa} XP</span>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('achievements-summary').innerText = `${unlockedCount} / ${SYSTEM_XP.achievements.length}`;
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('history-records-list');
+      container.innerHTML = "";
+
+      let filtered = SYSTEM_XP.records;
+      const todayStr = getTodayDateString();
+
+      if (currentHistoryTimeFilter === 'HOY') {
+        filtered = filtered.filter(r => r.fecha === todayStr);
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 font-mono text-center py-4">Sin registros para este filtro.</p>`;
+        return;
+      }
+
+      filtered.forEach(r => {
+        const item = document.createElement('div');
+        item.className = "p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex justify-between items-center text-xs font-mono";
+        item.innerHTML = `
+          <div>
+            <span class="font-bold text-slate-200 block">${r.mision}</span>
+            <span class="text-[10px] text-slate-400">${r.fecha} ${r.hora} • ${r.atributo}</span>
+          </div>
+          <span class="text-emerald-400 font-bold">+${r.xp} XP</span>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function setHistoryTimeFilter(filter) {
+      currentHistoryTimeFilter = filter;
+      ['hoy', 'semana', 'mes', 'todo'].forEach(f => {
+        const btn = document.getElementById(`hist-filter-${f}`);
+        if (f.toUpperCase() === filter) {
+          btn.className = "flex-1 py-1 rounded bg-cyan-500 text-slate-950 font-bold";
+        } else {
+          btn.className = "flex-1 py-1 rounded bg-slate-800 text-slate-400";
+        }
+      });
+      renderHistory();
+    }
+
+    function renderSubTabsData() {
+      // Render Special Missions
+      const specContainer = document.getElementById('special-missions-list');
+      specContainer.innerHTML = SYSTEM_XP.specialMissions.map(s => `
+        <div class="p-3 rounded-xl bg-slate-900 border border-purple-500/30 font-mono text-xs space-y-1">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-purple-300">${s.nombre}</span>
+            <span class="px-1.5 py-0.2 rounded bg-purple-950 text-purple-400 text-[9px] font-bold">${s.categoria}</span>
+          </div>
+          <p class="text-[10px] text-slate-400">${s.descripcion}</p>
+          <div class="flex justify-between items-center pt-1 text-[10px]">
+            <span class="text-slate-500">Límite: ${s.fechaLimite}</span>
+            <span class="text-emerald-400 font-bold">+${s.xp} XP</span>
+          </div>
+        </div>
+      `).join('');
+
+      // Render Boss Fights
+      const bossContainer = document.getElementById('boss-fights-list');
+      bossContainer.innerHTML = SYSTEM_XP.bossFights.map(b => `
+        <div class="p-3 rounded-xl bg-slate-900 border border-red-500/30 font-mono text-xs space-y-1">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-red-400">${b.nombre}</span>
+            <span class="text-slate-400 text-[10px]">${b.trimestre}</span>
+          </div>
+          <p class="text-[10px] text-slate-400">${b.descripcion}</p>
+          <div class="flex justify-between items-center pt-1 text-[10px]">
+            <span class="text-slate-500">Fecha: ${b.fecha}</span>
+            <span class="text-amber-400 font-bold">+${b.xp} XP</span>
+          </div>
+        </div>
+      `).join('');
+
+      // Render Rewards
+      const rewContainer = document.getElementById('rewards-list');
+      rewContainer.innerHTML = SYSTEM_XP.rewards.map(r => `
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs flex justify-between items-center">
+          <div>
+            <span class="font-bold text-slate-200 block">${r.condicion}</span>
+            <span class="text-[10px] text-slate-400">${r.descripcion}</span>
+          </div>
+          <span class="text-cyan-400 text-[10px] font-bold">${r.tipo}</span>
+        </div>
+      `).join('');
+
+      // Inject GAS Code
+      injectGasCodeData();
+    }
+
+
+    function injectGasCodeData() {
+      const codeGs = `// ==========================================
+// SYSTEM XP V1 - GOOGLE APPS SCRIPT BACKEND
+// ==========================================
+
+function doGet() {
+  return HtmlService.createTemplateFromFile('Index')
+    .evaluate()
+    .setTitle('SYSTEM XP V1')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+}
+
+function initializeSheets() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheets = ['PERFIL', 'MISIONES', 'REGISTROS', 'ATRIBUTOS', 'LOGROS', 'MISIONES_ESPECIALES', 'BOSS_FIGHTS', 'RECOMPENSAS', 'CONFIG'];
+  
+  sheets.forEach(s => {
+    if (!ss.getSheetByName(s)) {
+      ss.insertSheet(s);
+    }
+  });
+
+  // Setup PERFIL initial record
+  const perfilSheet = ss.getSheetByName('PERFIL');
+  if (perfilSheet.getLastRow() === 0) {
+    perfilSheet.appendRow(['ID', 'NOMBRE', 'XP_TOTAL', 'NIVEL', 'RANGO', 'RACHA', 'ULTIMO_DIA_ACTIVO', 'XP_HOY', 'XP_SEMANA']);
+    perfilSheet.appendRow(['PROF_1', 'Jugador', 180, 2, 'E', 0, '', 0, 180]);
+  }
+}
+
+function calculateLevel(xp) {
+  if (xp <= 0) return 1;
+  return Math.max(1, Math.floor((1 + Math.sqrt(1 + (8 * xp / 100))) / 2));
+}
+
+function calculateRequiredXp(level) {
+  if (level <= 1) return 0;
+  return (100 * level * (level - 1)) / 2;
+}
+
+function completeMission(missionId) {
+  const lock = LockService.getScriptLock();
+  lock.tryLock(10000);
+  
+  try {
+    // Process mission, update sheet records and return profile
+    return { success: true, message: 'Misión completada' };
+  } finally {
+    lock.releaseLock();
+  }
+}`;
+
+      const codeInit = `// EXECUTABLE SCRIPT FOR GOOGLE SHEETS
+function setupSystemXpDatabase() {
+  initializeSheets();
+  Logger.log("✅ Google Sheets inicializado correctamente para SYSTEM XP V1.");
+}`;
+
+      document.getElementById('gas-code-gs-text').innerText = codeGs;
+      document.getElementById('gas-code-init-text').innerText = codeInit;
+    }
+
+
+    function switchView(viewName) {
+      document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`view-${viewName}`).classList.remove('hidden');
+
+      // Update Navigation styling
+      ['dashboard', 'missions', 'attributes', 'achievements', 'more'].forEach(v => {
+        const btn = document.getElementById(`nav-btn-${v}`);
+        if (v === viewName) {
+          btn.className = "flex flex-col items-center gap-0.5 text-cyan-400 font-bold transition-all";
+        } else {
+          btn.className = "flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 transition-all";
+        }
+      });
+
+      if (viewName === 'missions') renderAllMissions();
+      if (viewName === 'attributes') renderAttributes();
+      if (viewName === 'achievements') renderAchievements();
+      if (viewName === 'more') renderSubTabsData();
+    }
+
+    function switchSubTab(subName) {
+      document.querySelectorAll('.subtab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`subtab-${subName}`).classList.remove('hidden');
+
+      ['history', 'special', 'boss', 'rewards', 'gas'].forEach(s => {
+        const btn = document.getElementById(`subtab-${s}-btn`);
+        if (s === subName) {
+          btn.className = "p-3 rounded-xl bg-slate-900 border border-cyan-500/50 text-cyan-400 text-left flex items-center gap-2";
+        } else {
+          btn.className = "p-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 text-left flex items-center gap-2";
+        }
+      });
+
+      if (subName === 'history') renderHistory();
+    }
+
+    function toggleSimMenu() {
+      document.getElementById('sim-day-dropdown').classList.toggle('hidden');
+    }
+
+    function setSimulatedDay(day) {
+      simulatedDayOverride = day;
+      document.getElementById('sim-day-label').innerText = day === 'AUTO' ? 'Hoy' : day;
+      
+      // Update checkmark icons
+      ['AUTO', 'LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO', 'DOMINGO'].forEach(d => {
+        const icon = document.getElementById(`sim-icon-${d}`);
+        if (icon) {
+          if (d === day) icon.classList.remove('hidden');
+          else icon.classList.add('hidden');
+        }
+      });
+
+      document.getElementById('sim-day-dropdown').classList.add('hidden');
+      renderDashboard();
+    }
+
+    function openManualMissionModal() {
+      document.getElementById('manual-mission-modal').classList.remove('hidden');
+      document.getElementById('manual-mission-modal').classList.add('flex');
+    }
+
+    function closeManualMissionModal() {
+      document.getElementById('manual-mission-modal').classList.add('hidden');
+      document.getElementById('manual-mission-modal').classList.remove('flex');
+    }
+
+    function toggleCodeViewer(id) {
+      document.getElementById(id).classList.toggle('hidden');
+    }
+
+    function copyCode(textElemId, event) {
+      event.stopPropagation();
+      const text = document.getElementById(textElemId).innerText;
+      
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+
+      showToastNotification("📋 Código copiado al portapapeles", "xp");
+    }
+
+    function showToastNotification(message, type = "xp") {
+      const container = document.getElementById('xp-toast-container');
+      const toast = document.createElement('div');
+      
+      toast.className = `xp-float-anim px-4 py-2 rounded-xl font-mono text-xs font-bold shadow-2xl border ${
+        type === 'levelup' 
+          ? 'bg-purple-950 text-purple-300 border-purple-500' 
+          : type === 'warning'
+            ? 'bg-amber-950 text-amber-300 border-amber-500'
+            : 'bg-cyan-950 text-cyan-300 border-cyan-500'
+      }`;
+      toast.innerText = message;
+
+      container.appendChild(toast);
+      setTimeout(() => {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 1200);
+    }
+
+    window.onload = function() {
+      loadState();
+      renderDashboard();
+    };
+  </script>
+</body>
+</html>
