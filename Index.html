@@ -42,7 +42,6 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- Custom Styling -->
   <style>
     body {
       background-color: #0a0d14;
@@ -63,36 +62,10 @@
       background: #1e293b;
       border-radius: 4px;
     }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #334155;
-    }
 
     .hud-border-glow {
       border: 1px solid rgba(56, 189, 248, 0.3);
       box-shadow: inset 0 0 10px rgba(56, 189, 248, 0.05), 0 0 15px rgba(56, 189, 248, 0.1);
-    }
-
-    .xp-float-anim {
-      animation: floatUpAndFade 1.2s cubic-bezier(0.16, 1, 0.3, 1) FORWARDS;
-    }
-
-    @keyframes floatUpAndFade {
-      0% {
-        opacity: 0;
-        transform: translateY(10px) scale(0.8);
-      }
-      20% {
-        opacity: 1;
-        transform: translateY(-5px) scale(1.1);
-      }
-      80% {
-        opacity: 1;
-        transform: translateY(-25px) scale(1);
-      }
-      100% {
-        opacity: 0;
-        transform: translateY(-40px) scale(0.9);
-      }
     }
 
     .progress-bar-glow {
@@ -108,7 +81,7 @@
 </head>
 <body class="h-full flex flex-col justify-between overflow-x-hidden pb-20">
 
-  <!-- Top Navigation & System Status Header -->
+  <!-- Header -->
   <header class="sticky top-0 z-40 glass-panel border-b border-hud-border px-4 py-3 flex items-center justify-between">
     <div class="flex items-center space-x-3">
       <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-slate-900 font-extrabold shadow-glow-blue">
@@ -125,37 +98,21 @@
 
     <div class="flex items-center space-x-2">
       <div class="relative inline-block text-left">
-        <button id="sim-day-btn" onclick="toggleSimMenu()" class="text-xs font-mono bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors">
+        <button id="sim-day-btn" onclick="toggleSimMenu()" class="text-xs font-mono bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5">
           <i class="fa-regular fa-calendar-check text-cyan-400"></i>
           <span id="sim-day-label">Hoy</span>
           <i class="fa-solid fa-chevron-down text-[10px] text-slate-500"></i>
         </button>
         <div id="sim-day-dropdown" class="hidden absolute right-0 mt-2 w-44 rounded-xl bg-slate-900 border border-slate-800 shadow-2xl z-50 py-1 text-xs">
           <div class="px-3 py-1.5 text-[10px] font-bold text-slate-500 uppercase font-mono border-b border-slate-800">Simular Día</div>
-          <button onclick="setSimulatedDay('AUTO')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-cyan-400 flex items-center justify-between">
-            <span>Día Real</span> <i id="sim-icon-AUTO" class="fa-solid fa-check text-[10px]"></i>
-          </button>
-          <button onclick="setSimulatedDay('LUNES')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300 flex items-center justify-between">
-            <span>Lunes (Clases)</span> <i id="sim-icon-LUNES" class="fa-solid fa-check text-[10px] hidden"></i>
-          </button>
-          <button onclick="setSimulatedDay('MARTES')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300 flex items-center justify-between">
-            <span>Martes (Clases)</span> <i id="sim-icon-MARTES" class="fa-solid fa-check text-[10px] hidden"></i>
-          </button>
-          <button onclick="setSimulatedDay('MIERCOLES')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300 flex items-center justify-between">
-            <span>Miércoles (Clases)</span> <i id="sim-icon-MIERCOLES" class="fa-solid fa-check text-[10px] hidden"></i>
-          </button>
-          <button onclick="setSimulatedDay('JUEVES')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300 flex items-center justify-between">
-            <span>Jueves (Clases)</span> <i id="sim-icon-JUEVES" class="fa-solid fa-check text-[10px] hidden"></i>
-          </button>
-          <button onclick="setSimulatedDay('VIERNES')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300 flex items-center justify-between">
-            <span>Viernes (Clases)</span> <i id="sim-icon-VIERNES" class="fa-solid fa-check text-[10px] hidden"></i>
-          </button>
-          <button onclick="setSimulatedDay('SABADO')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300 flex items-center justify-between">
-            <span>Sábado (Fin de Sem)</span> <i id="sim-icon-SABADO" class="fa-solid fa-check text-[10px] hidden"></i>
-          </button>
-          <button onclick="setSimulatedDay('DOMINGO')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300 flex items-center justify-between">
-            <span>Domingo (Fin de Sem)</span> <i id="sim-icon-DOMINGO" class="fa-solid fa-check text-[10px] hidden"></i>
-          </button>
+          <button onclick="setSimulatedDay('AUTO')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-cyan-400">Día Real</button>
+          <button onclick="setSimulatedDay('LUNES')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300">Lunes (Clases)</button>
+          <button onclick="setSimulatedDay('MARTES')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300">Martes (Clases)</button>
+          <button onclick="setSimulatedDay('MIERCOLES')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300">Miércoles (Clases)</button>
+          <button onclick="setSimulatedDay('JUEVES')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300">Jueves (Clases)</button>
+          <button onclick="setSimulatedDay('VIERNES')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300">Viernes (Clases)</button>
+          <button onclick="setSimulatedDay('SABADO')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300">Sábado (Fin de Sem)</button>
+          <button onclick="setSimulatedDay('DOMINGO')" class="w-full text-left px-3 py-1.5 hover:bg-slate-800 text-slate-300">Domingo (Fin de Sem)</button>
         </div>
       </div>
 
@@ -169,17 +126,14 @@
     </div>
   </header>
 
-  <!-- Main View Container -->
+  <!-- Container Principal -->
   <main class="max-w-md w-full mx-auto px-4 pt-4 flex-1 flex flex-col gap-4">
 
     <div id="xp-toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center"></div>
 
-    <!-- VIEW 1: DASHBOARD -->
+    <!-- VIEW 1: DASHBOARD (INICIO) -->
     <section id="view-dashboard" class="view-section flex flex-col gap-4">
       <div class="hud-border-glow rounded-2xl bg-hud-card p-4 relative overflow-hidden">
-        <div class="absolute -right-8 -top-8 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
-        <div class="absolute -left-8 -bottom-8 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
-
         <div class="flex items-start justify-between mb-3 relative z-10">
           <div class="flex items-center space-x-3">
             <div class="relative">
@@ -206,7 +160,7 @@
           <div class="flex flex-col items-end">
             <div class="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
               <i class="fa-solid fa-fire text-amber-400 text-sm animate-pulse"></i>
-              <span id="streak-count" class="font-bold text-sm font-mono">0</span>
+              <span id="streak-count" class="font-bold text-sm font-mono">1</span>
               <span class="text-[10px] font-mono text-amber-300/80 uppercase">Días</span>
             </div>
             <span class="text-[9px] font-mono text-slate-500 mt-1">Racha Activa</span>
@@ -245,7 +199,7 @@
           <span id="routine-tag-icon" class="w-2 h-2 rounded-full bg-blue-400 animate-ping"></span>
           <span id="routine-label" class="font-bold text-slate-200">📚 RUTINA DE CLASES</span>
         </div>
-        <span id="routine-day-badge" class="text-[10px] font-mono uppercase text-slate-400 bg-slate-800 px-2 py-0.5 rounded-md">LUNES</span>
+        <span id="routine-day-badge" class="text-[10px] font-mono uppercase text-slate-400 bg-slate-800 px-2 py-0.5 rounded-md">HOY</span>
       </div>
 
       <div class="space-y-3">
@@ -270,22 +224,10 @@
           <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
             <i class="fa-solid fa-scroll text-cyan-400"></i> Banco de Misiones
           </h2>
-          <p class="text-xs text-slate-400">Todas las rutinas y misiones disponibles</p>
+          <p class="text-xs text-slate-400">Lista completa de misiones diarias y semanales</p>
         </div>
-        <button onclick="openManualMissionModal()" class="px-3 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs font-mono hover:bg-cyan-400 transition-colors">
+        <button onclick="openManualMissionModal()" class="px-3 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs font-mono hover:bg-cyan-400">
           + Nueva
-        </button>
-      </div>
-
-      <div class="flex rounded-xl bg-slate-900 p-1 border border-slate-800 text-xs font-mono">
-        <button onclick="filterMissionsTab('TODOS')" id="tab-m-todos" class="flex-1 py-1.5 rounded-lg font-semibold transition-all bg-cyan-500 text-slate-950">
-          Todas
-        </button>
-        <button onclick="filterMissionsTab('CLASES')" id="tab-m-clases" class="flex-1 py-1.5 rounded-lg font-semibold text-slate-400 hover:text-slate-200 transition-all">
-          Clases
-        </button>
-        <button onclick="filterMissionsTab('FIN_DE_SEMANA')" id="tab-m-finde" class="flex-1 py-1.5 rounded-lg font-semibold text-slate-400 hover:text-slate-200 transition-all">
-          Fin de Semana
         </button>
       </div>
 
@@ -298,7 +240,7 @@
         <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
           <i class="fa-solid fa-chart-pie text-cyan-400"></i> Atributos del Jugador
         </h2>
-        <p class="text-xs text-slate-400">Nivel y XP acumulados por categoría</p>
+        <p class="text-xs text-slate-400">XP acumulado por cada disciplina</p>
       </div>
       <div id="attributes-grid" class="grid grid-cols-1 gap-2.5"></div>
     </section>
@@ -307,85 +249,22 @@
     <section id="view-achievements" class="view-section hidden flex-col gap-4">
       <div>
         <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
-          <i class="fa-solid fa-trophy text-amber-400"></i> Logros y Hitos
+          <i class="fa-solid fa-trophy text-amber-400"></i> Logros
         </h2>
-        <p class="text-xs text-slate-400">Desbloquea recompensas completando desafíos</p>
+        <p class="text-xs text-slate-400">Premios acumulables por constancia</p>
       </div>
-
-      <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs font-mono">
-        <span class="text-slate-300">Logros Desbloqueados:</span>
-        <span id="achievements-summary" class="font-bold text-amber-400">0 / 11</span>
-      </div>
-
       <div id="achievements-list" class="space-y-2.5"></div>
     </section>
 
-    <!-- VIEW 5: MÁS -->
+    <!-- VIEW 5: MÁS (HISTORIAL & EXTRAS) -->
     <section id="view-more" class="view-section hidden flex-col gap-4">
       <div>
         <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
-          <i class="fa-solid fa-bars-staggered text-cyan-400"></i> Panel Extendido
+          <i class="fa-solid fa-clock-rotate-left text-cyan-400"></i> Historial de Actividades
         </h2>
-        <p class="text-xs text-slate-400">Historial, Misiones Especiales, Boss Fights y Código GAS</p>
+        <p class="text-xs text-slate-400">Registro completo de XP completado</p>
       </div>
-
-      <div class="grid grid-cols-2 gap-2 text-xs font-mono">
-        <button onclick="switchSubTab('history')" id="subtab-history-btn" class="p-3 rounded-xl bg-slate-900 border border-cyan-500/50 text-cyan-400 text-left flex items-center gap-2">
-          <i class="fa-solid fa-clock-rotate-left"></i> Historial
-        </button>
-        <button onclick="switchSubTab('special')" id="subtab-special-btn" class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 text-left flex items-center gap-2">
-          <i class="fa-solid fa-star"></i> Misiones Esp.
-        </button>
-        <button onclick="switchSubTab('boss')" id="subtab-boss-btn" class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 text-left flex items-center gap-2">
-          <i class="fa-solid fa-dragon"></i> Boss Fights
-        </button>
-        <button onclick="switchSubTab('rewards')" id="subtab-rewards-btn" class="p-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 text-left flex items-center gap-2">
-          <i class="fa-solid fa-gift"></i> Recompensas
-        </button>
-      </div>
-
-      <button onclick="switchSubTab('gas')" id="subtab-gas-btn" class="w-full p-3 rounded-xl bg-gradient-to-r from-purple-900/50 to-blue-900/50 border border-purple-500/40 text-purple-300 font-mono font-bold text-xs flex items-center justify-between">
-        <span class="flex items-center gap-2"><i class="fa-solid fa-code text-cyan-400"></i> PROMPT DEFINITIVO / GENERADOR CÓDIGO GAS</span>
-        <i class="fa-solid fa-chevron-right text-[10px]"></i>
-      </button>
-
-      <!-- SUB-TAB 1: HISTORIAL -->
-      <div id="subtab-history" class="subtab-content flex flex-col gap-3">
-        <div class="flex flex-col gap-2 bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-          <div class="flex gap-1 text-[11px] font-mono">
-            <button onclick="setHistoryTimeFilter('HOY')" id="hist-filter-hoy" class="flex-1 py-1 rounded bg-cyan-500 text-slate-950 font-bold">Hoy</button>
-            <button onclick="setHistoryTimeFilter('SEMANA')" id="hist-filter-semana" class="flex-1 py-1 rounded bg-slate-800 text-slate-400">Semana</button>
-            <button onclick="setHistoryTimeFilter('MES')" id="hist-filter-mes" class="flex-1 py-1 rounded bg-slate-800 text-slate-400">Mes</button>
-            <button onclick="setHistoryTimeFilter('TODO')" id="hist-filter-todo" class="flex-1 py-1 rounded bg-slate-800 text-slate-400">Todo</button>
-          </div>
-        </div>
-        <div id="history-records-list" class="space-y-2"></div>
-      </div>
-
-      <!-- SUB-TAB 2: MISIONES ESPECIALES -->
-      <div id="subtab-special" class="subtab-content hidden flex-col gap-2.5">
-        <div id="special-missions-list" class="space-y-2.5"></div>
-      </div>
-
-      <!-- SUB-TAB 3: BOSS FIGHTS -->
-      <div id="subtab-boss" class="subtab-content hidden flex-col gap-2.5">
-        <div id="boss-fights-list" class="space-y-2.5"></div>
-      </div>
-
-      <!-- SUB-TAB 4: RECOMPENSAS -->
-      <div id="subtab-rewards" class="subtab-content hidden flex-col gap-2.5">
-        <div id="rewards-list" class="space-y-2.5"></div>
-      </div>
-
-      <!-- SUB-TAB 5: GOOGLE APPS SCRIPT CODE -->
-      <div id="subtab-gas" class="subtab-content hidden flex-col gap-3">
-        <div class="p-3.5 rounded-xl bg-purple-950/30 border border-purple-500/40 text-xs text-purple-200">
-          <p class="font-bold mb-1 flex items-center gap-1.5"><i class="fa-solid fa-circle-info"></i> Para Implementar en Google Apps Script:</p>
-          <p class="text-[11px] text-purple-300/80 leading-relaxed">
-            Puedes copiar y pegar directamente cada uno de estos archivos en tu proyecto de Google Apps Script.
-          </p>
-        </div>
-      </div>
+      <div id="history-records-list" class="space-y-2"></div>
     </section>
   </main>
 
@@ -404,32 +283,24 @@
       <form onsubmit="handleManualMissionSubmit(event)" class="space-y-3 font-mono text-xs">
         <div>
           <label class="block text-slate-400 text-[10px] uppercase mb-1">Nombre de la Actividad</label>
-          <input type="text" id="manual-name" required placeholder="Ej. Lectura extra / Repaso de examen" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:outline-none focus:border-cyan-500">
+          <input type="text" id="manual-name" required placeholder="Ej. Repaso de Matemáticas / Examen" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:outline-none focus:border-cyan-500">
         </div>
 
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block text-slate-400 text-[10px] uppercase mb-1">Atributo</label>
             <select id="manual-attribute" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:outline-none focus:border-cyan-500">
-              <option value="Conocimiento">Conocimiento</option>
-              <option value="Tecnología">Tecnología</option>
-              <option value="Físico">Físico</option>
-              <option value="Combate">Combate</option>
-              <option value="Mindset">Mindset</option>
+              <option value="Preparación ESFM">Preparación ESFM</option>
               <option value="Programación">Programación</option>
               <option value="Inglés">Inglés</option>
-              <option value="Preparación ESFM">Preparación ESFM</option>
+              <option value="Físico">Físico</option>
+              <option value="Mindset">Mindset</option>
             </select>
           </div>
           <div>
             <label class="block text-slate-400 text-[10px] uppercase mb-1">Recompensa (XP)</label>
             <input type="number" id="manual-xp" required min="5" max="500" value="30" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:outline-none focus:border-cyan-500">
           </div>
-        </div>
-
-        <div>
-          <label class="block text-slate-400 text-[10px] uppercase mb-1">Nota Opcional</label>
-          <input type="text" id="manual-note" placeholder="Ej. Módulo 3 completado" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 focus:outline-none focus:border-cyan-500">
         </div>
 
         <div class="pt-2 flex gap-2">
@@ -445,29 +316,29 @@
   </div>
 
   <!-- FIXED BOTTOM NAVIGATION -->
-  <nav class="fixed bottom-0 left-0 right-0 z-40 glass-panel border-t border-hud-border py-1.5 px-3">
+  <nav class="fixed bottom-0 left-0 right-0 z-40 glass-panel border-t border-hud-border py-2 px-3">
     <div class="max-w-md mx-auto flex items-center justify-around font-mono text-[10px]">
-      <button onclick="switchView('dashboard')" id="nav-btn-dashboard" class="flex flex-col items-center gap-0.5 text-cyan-400 font-bold transition-all">
+      <button onclick="switchView('dashboard')" id="nav-btn-dashboard" class="flex flex-col items-center gap-0.5 text-cyan-400 font-bold">
         <i class="fa-solid fa-house-chimney text-base"></i>
         <span>INICIO</span>
       </button>
 
-      <button onclick="switchView('missions')" id="nav-btn-missions" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 transition-all">
+      <button onclick="switchView('missions')" id="nav-btn-missions" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200">
         <i class="fa-solid fa-crosshairs text-base"></i>
         <span>MISIONES</span>
       </button>
 
-      <button onclick="switchView('attributes')" id="nav-btn-attributes" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 transition-all">
+      <button onclick="switchView('attributes')" id="nav-btn-attributes" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200">
         <i class="fa-solid fa-chart-pie text-base"></i>
         <span>ATRIBUTOS</span>
       </button>
 
-      <button onclick="switchView('achievements')" id="nav-btn-achievements" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 transition-all">
+      <button onclick="switchView('achievements')" id="nav-btn-achievements" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200">
         <i class="fa-solid fa-trophy text-base"></i>
         <span>LOGROS</span>
       </button>
 
-      <button onclick="switchView('more')" id="nav-btn-more" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 transition-all">
+      <button onclick="switchView('more')" id="nav-btn-more" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200">
         <i class="fa-solid fa-bars-staggered text-base"></i>
         <span>MÁS</span>
       </button>
@@ -476,53 +347,87 @@
 
   <!-- JavaScript Application Engine -->
   <script>
-    // URL DE CONEXIÓN CON TU GOOGLE APPS SCRIPT / GOOGLE SHEETS BACKEND
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxL5KPoRg0StEm0TJwM3pRa2mBxwLyUXKqoX53DB2tVXwKjtpa3uGmLnFuRGPERKN2W/exec';
 
     let soundEnabled = true;
     let simulatedDayOverride = 'AUTO';
-    let currentHistoryTimeFilter = 'HOY';
 
-    // SYSTEM XP IN-MEMORY BACKEND PERSISTENCE
     const SYSTEM_XP = {
       profile: {
         id: "PROFILE_1",
         nombre: "Jugador",
         xpTotal: 180,
-        nivel: 2,
-        rango: "E",
-        racha: 0,
-        ultimoDiaActivo: "",
+        racha: 1,
         xpHoy: 0,
         xpSemana: 0
       },
       missions: [
-        { id: "M_01", nombre: "Despertar a tiempo", descripcion: "Levantarse a las 05:45", atributo: "Mindset", dia: "TODOS", rutina: "CLASES", horaInicio: "05:45", horaFin: "06:00", xp: 10, tipo: "DIARIA", activa: true },
-        { id: "M_02", nombre: "Salir puntual", descripcion: "Salir de casa a las 06:20", atributo: "Apariencia", dia: "TODOS", rutina: "CLASES", horaInicio: "06:20", horaFin: "06:30", xp: 10, tipo: "DIARIA", activa: true },
-        { id: "M_03", nombre: "Asistir a clases ESFM", descripcion: "Atención completa en la escuela", atributo: "Preparación ESFM", dia: "TODOS", rutina: "CLASES", horaInicio: "07:00", horaFin: "13:30", xp: 30, tipo: "DIARIA", activa: true },
-        { id: "M_04", nombre: "Práctica de Programación", descripcion: "Estudio y código en VS Code", atributo: "Programación", dia: "TODOS", rutina: "CLASES", horaInicio: "15:00", horaFin: "17:00", xp: 25, tipo: "DIARIA", activa: true }
+        { id: "M_01", nombre: "Despertar a tiempo", descripcion: "Levantarse a las 05:45", atributo: "Mindset", horaInicio: "05:45", xp: 10 },
+        { id: "M_02", nombre: "Salir puntual", descripcion: "Salir de casa a las 06:20", atributo: "Apariencia", horaInicio: "06:20", xp: 10 },
+        { id: "M_03", nombre: "Asistir a clases ESFM", descripcion: "Atención completa en la escuela", atributo: "Preparación ESFM", horaInicio: "07:00", xp: 30 },
+        { id: "M_04", nombre: "Práctica de Programación", descripcion: "Estudio y código en VS Code", atributo: "Programación", horaInicio: "15:00", xp: 25 },
+        { id: "M_05", nombre: "Repaso de Inglés", descripcion: "Vocabulario y gramática 30 min", atributo: "Inglés", horaInicio: "18:00", xp: 20 },
+        { id: "M_06", nombre: "Ejercicio Físico", descripcion: "Rutina de fuerza / Cardio", atributo: "Físico", horaInicio: "19:30", xp: 25 }
       ],
       records: [],
-      achievements: [],
-      specialMissions: [],
-      bossFights: [],
-      rewards: []
+      achievements: [
+        { id: "ACH_01", nombre: "Primer Paso", desc: "Completa tu primera misión", xp: 50, icono: "fa-shoe-prints" },
+        { id: "ACH_02", nombre: "Racha de Fuego", desc: "Mantiene una racha activa", xp: 100, icono: "fa-fire" },
+        { id: "ACH_03", nombre: "Programador ESFM", desc: "Consigue 100+ XP en Programación", xp: 150, icono: "fa-code" }
+      ]
     };
+
+    function getTodayString() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function isMissionCompletedToday(missionId) {
+      const todayIso = getTodayString();
+      return SYSTEM_XP.records.some(r => r.misionId === missionId && r.fechaIso === todayIso);
+    }
+
+    function calculateLevelInfo(xpTotal) {
+      let level = 1;
+      let minXP = 0;
+      let maxXP = 100;
+      let step = 100;
+
+      while (xpTotal >= maxXP) {
+        level++;
+        minXP = maxXP;
+        step += 100;
+        maxXP = minXP + step;
+      }
+
+      let rank = "E";
+      let rankTitle = "Rango E — Novato";
+      if (level >= 4) { rank = "D"; rankTitle = "Rango D — Aprendiz"; }
+      if (level >= 8) { rank = "C"; rankTitle = "Rango C — Aventurero"; }
+      if (level >= 12) { rank = "B"; rankTitle = "Rango B — Elite"; }
+      if (level >= 18) { rank = "A"; rankTitle = "Rango A — Maestro"; }
+      if (level >= 25) { rank = "S"; rankTitle = "Rango S — Leyenda"; }
+
+      const progress = xpTotal - minXP;
+      const range = maxXP - minXP;
+      const percent = Math.min(100, Math.round((progress / range) * 100));
+
+      return { level, rank, rankTitle, minXP, maxXP, progress, percent, needed: maxXP - xpTotal };
+    }
 
     function saveState() {
       try {
         localStorage.setItem('SYSTEM_XP_DATA_V1', JSON.stringify(SYSTEM_XP));
-        // Sincronizar remotamente con Google Sheets si la URL está definida
         if (GOOGLE_SCRIPT_URL) {
           fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(SYSTEM_XP)
-          }).catch(err => console.log('Sincronización remota diferida:', err));
+          }).catch(e => console.log('Sync diferido:', e));
         }
       } catch (e) {
-        console.error("Error al guardar:", e);
+        console.error(e);
       }
     }
 
@@ -536,17 +441,15 @@
           if (parsed.missions) SYSTEM_XP.missions = parsed.missions;
         }
       } catch (e) {
-        console.error("Error al cargar:", e);
+        console.error(e);
       }
     }
 
     function resetSystemData() {
-      if (localStorage.getItem('SYSTEM_XP_DATA_V1')) {
+      if (confirm('¿Seguro que deseas reiniciar los datos guardados?')) {
         localStorage.removeItem('SYSTEM_XP_DATA_V1');
-        showToastNotification("🔄 Datos reiniciados. Recargando...", "warning");
-        setTimeout(() => location.reload(), 1000);
-      } else {
-        showToastNotification("⚠️ No hay datos guardados", "warning");
+        showToastNotification("🔄 Datos reiniciados", "warning");
+        setTimeout(() => location.reload(), 800);
       }
     }
 
@@ -562,16 +465,186 @@
       setTimeout(() => toast.remove(), 2500);
     }
 
-    function switchView(viewName) {
-      document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-      const targetView = document.getElementById(`view-${viewName}`);
-      if (targetView) targetView.classList.remove('hidden');
+    function completeMission(missionId) {
+      const mission = SYSTEM_XP.missions.find(m => m.id === missionId);
+      if (!mission) return;
+
+      if (isMissionCompletedToday(missionId)) {
+        showToastNotification("⚠️ Ya completaste esta misión hoy", "warning");
+        return;
+      }
+
+      const todayIso = getTodayString();
+      const timeNow = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+      SYSTEM_XP.records.unshift({
+        id: "REC_" + Date.now(),
+        misionId: mission.id,
+        mision: mission.nombre,
+        atributo: mission.atributo,
+        xp: mission.xp,
+        fecha: new Date().toLocaleDateString('es-ES'),
+        fechaIso: todayIso,
+        hora: timeNow
+      });
+
+      SYSTEM_XP.profile.xpTotal += mission.xp;
+      SYSTEM_XP.profile.xpHoy += mission.xp;
+      SYSTEM_XP.profile.xpSemana += mission.xp;
+
+      saveState();
+      renderDashboard();
+      showToastNotification(`+${mission.xp} XP — ${mission.nombre}`);
     }
 
-    function switchSubTab(subTabName) {
-      document.querySelectorAll('.subtab-content').forEach(el => el.classList.add('hidden'));
-      const targetSub = document.getElementById(`subtab-${subTabName}`);
-      if (targetSub) targetSub.classList.remove('hidden');
+    function switchView(viewName) {
+      const views = ['dashboard', 'missions', 'attributes', 'achievements', 'more'];
+      views.forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        const navBtn = document.getElementById(`nav-btn-${v}`);
+        if (el) el.classList.add('hidden');
+        if (navBtn) {
+          navBtn.classList.remove('text-cyan-400', 'font-bold');
+          navBtn.classList.add('text-slate-400');
+        }
+      });
+
+      const targetView = document.getElementById(`view-${viewName}`);
+      const targetNav = document.getElementById(`nav-btn-${viewName}`);
+      if (targetView) targetView.classList.remove('hidden');
+      if (targetNav) {
+        targetNav.classList.remove('text-slate-400');
+        targetNav.classList.add('text-cyan-400', 'font-bold');
+      }
+
+      if (viewName === 'dashboard') renderDashboard();
+      if (viewName === 'missions') renderMissions();
+      if (viewName === 'attributes') renderAttributes();
+      if (viewName === 'achievements') renderAchievements();
+      if (viewName === 'more') renderHistory();
+    }
+
+    function renderDashboard() {
+      const p = SYSTEM_XP.profile;
+      const lvlInfo = calculateLevelInfo(p.xpTotal);
+
+      document.getElementById('player-name').innerText = p.nombre;
+      document.getElementById('player-level').innerText = `NIVEL ${lvlInfo.level}`;
+      document.getElementById('player-xp-total').innerText = `${p.xpTotal} XP`;
+      document.getElementById('rank-badge').innerText = lvlInfo.rank;
+      document.getElementById('rank-title-badge').innerText = lvlInfo.rankTitle;
+      document.getElementById('streak-count').innerText = p.racha;
+
+      document.getElementById('xp-progress-text').innerText = `${lvlInfo.progress} / ${lvlInfo.maxXP - lvlInfo.minXP} XP`;
+      document.getElementById('xp-progress-bar').style.width = `${lvlInfo.percent}%`;
+      document.getElementById('current-lvl-min-xp').innerText = `${lvlInfo.minXP} XP`;
+      document.getElementById('next-lvl-needed').innerText = `Faltan ${lvlInfo.needed} XP`;
+      document.getElementById('next-lvl-max-xp').innerText = `${lvlInfo.maxXP} XP`;
+
+      document.getElementById('xp-today-display').innerText = `${p.xpHoy} XP`;
+      document.getElementById('xp-week-display').innerText = `${p.xpSemana} XP`;
+
+      const listContainer = document.getElementById('today-missions-list');
+      let completedCount = 0;
+
+      listContainer.innerHTML = SYSTEM_XP.missions.map(m => {
+        const completed = isMissionCompletedToday(m.id);
+        if (completed) completedCount++;
+
+        return `
+          <div class="p-3 rounded-xl ${completed ? 'bg-slate-900/40 border-slate-800/50 opacity-60' : 'bg-slate-900 border-slate-800'} border flex justify-between items-center text-xs font-mono">
+            <div>
+              <div class="font-bold ${completed ? 'line-through text-slate-500' : 'text-slate-200'}">${m.nombre}</div>
+              <div class="text-[10px] text-slate-500">${m.atributo} • ${m.horaInicio || 'Diario'}</div>
+            </div>
+            ${completed ? `
+              <span class="px-2.5 py-1.5 rounded-lg bg-emerald-950/60 text-emerald-400 border border-emerald-800/60 text-[10px] font-bold">
+                ✓ COMPLETADO
+              </span>
+            ` : `
+              <button onclick="completeMission('${m.id}')" class="px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-[10px] shadow-glow-blue">
+                +${m.xp} XP
+              </button>
+            `}
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('missions-count-badge').innerText = `${completedCount}/${SYSTEM_XP.missions.length} Completadas`;
+
+      const dateEl = document.getElementById('current-date-display');
+      const today = new Date();
+      dateEl.innerText = today.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' }).toUpperCase();
+    }
+
+    function renderMissions() {
+      const container = document.getElementById('all-missions-list');
+      container.innerHTML = SYSTEM_XP.missions.map(m => `
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 flex justify-between items-center text-xs font-mono">
+          <div>
+            <div class="font-bold text-slate-200">${m.nombre}</div>
+            <div class="text-[10px] text-slate-500">${m.atributo} • ${m.descripcion}</div>
+          </div>
+          <span class="px-2.5 py-1 rounded bg-cyan-950 text-cyan-400 border border-cyan-800 text-[10px] font-bold">+${m.xp} XP</span>
+        </div>
+      `).join('');
+    }
+
+    function renderAttributes() {
+      const container = document.getElementById('attributes-grid');
+      const attrs = {};
+
+      SYSTEM_XP.records.forEach(r => {
+        attrs[r.atributo] = (attrs[r.atributo] || 0) + r.xp;
+      });
+
+      if (Object.keys(attrs).length === 0) {
+        container.innerHTML = `<p class="text-xs font-mono text-slate-500 p-4 text-center">Sin actividades registradas aún.</p>`;
+        return;
+      }
+
+      container.innerHTML = Object.keys(attrs).map(attr => `
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 flex justify-between items-center text-xs font-mono">
+          <span class="font-bold text-slate-200">${attr}</span>
+          <span class="font-bold text-cyan-400">${attrs[attr]} XP</span>
+        </div>
+      `).join('');
+    }
+
+    function renderAchievements() {
+      const container = document.getElementById('achievements-list');
+      container.innerHTML = SYSTEM_XP.achievements.map(a => `
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs font-mono">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center justify-center">
+              <i class="fa-solid ${a.icono}"></i>
+            </div>
+            <div>
+              <div class="font-bold text-slate-200">${a.nombre}</div>
+              <div class="text-[10px] text-slate-500">${a.desc}</div>
+            </div>
+          </div>
+          <span class="text-amber-400 font-bold text-[10px]">+${a.xp} XP</span>
+        </div>
+      `).join('');
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('history-records-list');
+      if (SYSTEM_XP.records.length === 0) {
+        container.innerHTML = `<p class="text-xs font-mono text-slate-500 p-4 text-center">No hay registros completados todavía.</p>`;
+        return;
+      }
+
+      container.innerHTML = SYSTEM_XP.records.map(r => `
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800/80 flex justify-between items-center text-xs font-mono">
+          <div>
+            <div class="font-bold text-slate-200">${r.mision}</div>
+            <div class="text-[10px] text-slate-500">${r.atributo} • ${r.fecha} ${r.hora || ''}</div>
+          </div>
+          <span class="text-emerald-400 font-bold">+${r.xp} XP</span>
+        </div>
+      `).join('');
     }
 
     function openManualMissionModal() {
@@ -599,43 +672,15 @@
         mision: name,
         atributo: attr,
         xp: xp,
-        fecha: new Date().toLocaleDateString('es-ES')
+        fecha: new Date().toLocaleDateString('es-ES'),
+        fechaIso: getTodayString(),
+        hora: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
       });
 
       saveState();
       renderDashboard();
       closeManualMissionModal();
-      showToastNotification(`+${xp} XP de ${attr} registrado`);
-    }
-
-    function renderDashboard() {
-      const p = SYSTEM_XP.profile;
-      const totalEl = document.getElementById('player-xp-total');
-      const todayEl = document.getElementById('xp-today-display');
-      const weekEl = document.getElementById('xp-week-display');
-      
-      if (totalEl) totalEl.innerText = `${p.xpTotal} XP`;
-      if (todayEl) todayEl.innerText = `${p.xpHoy} XP`;
-      if (weekEl) weekEl.innerText = `${p.xpSemana} XP`;
-
-      const listContainer = document.getElementById('today-missions-list');
-      if (listContainer) {
-        listContainer.innerHTML = SYSTEM_XP.missions.map(m => `
-          <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 flex justify-between items-center text-xs font-mono">
-            <div>
-              <div class="font-bold text-slate-200">${m.nombre}</div>
-              <div class="text-[10px] text-slate-500">${m.atributo} • ${m.horaInicio || 'Todo el día'}</div>
-            </div>
-            <span class="px-2 py-1 rounded bg-cyan-950 text-cyan-400 border border-cyan-800 text-[10px] font-bold">+${m.xp} XP</span>
-          </div>
-        `).join('');
-      }
-
-      const dateEl = document.getElementById('current-date-display');
-      if (dateEl) {
-        const today = new Date();
-        dateEl.innerText = today.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' }).toUpperCase();
-      }
+      showToastNotification(`+${xp} XP registrado: ${name}`);
     }
 
     function toggleAudio() {
